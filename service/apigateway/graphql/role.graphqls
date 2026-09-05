@@ -1,0 +1,103 @@
+# input
+input FindAllRoleInput {
+  page: Int
+  page_size: Int
+  search: String
+}
+
+input FindByIdRoleInput {
+  role_id: Int!
+}
+
+input FindByUserIdRoleInput {
+  user_id: Int!
+}
+
+input CreateRoleInput {
+  name: String!
+}
+
+input UpdateRoleInput {
+  id: Int!
+  name: String!
+}
+
+# types
+type RoleResponse {
+  id: Int!
+  name: String!
+  created_at: String!
+  updated_at: String!
+}
+
+type RoleResponseDeletedAt {
+  id: Int!
+  name: String!
+  created_at: String!
+  updated_at: String!
+  deleted_at: String
+}
+
+# response types
+type ApiResponseRole {
+  status: String!
+  message: String!
+  data: RoleResponse
+}
+
+type ApiResponseRoleDeleteAt {
+  status: String!
+  message: String!
+  data: RoleResponseDeletedAt
+}
+
+type ApiResponsesRole {
+  status: String!
+  message: String!
+  data: [RoleResponse!]!
+}
+
+type ApiResponsePaginationRole {
+  status: String!
+  message: String!
+  data: [RoleResponse!]!
+  pagination: PaginationMeta!
+}
+
+type ApiResponsePaginationRoleDeleteAt {
+  status: String!
+  message: String!
+  data: [RoleResponseDeletedAt!]!
+  pagination: PaginationMeta!
+}
+
+type ApiResponseRoleDelete {
+  status: String!
+  message: String!
+}
+
+type ApiResponseRoleAll {
+  status: String!
+  message: String!
+}
+
+# queries and mutation
+extend type Query {
+  findAllRole(input: FindAllRoleInput!): ApiResponsePaginationRole!
+  findByIdRole(input: FindByIdRoleInput!): ApiResponseRole!
+  findByActiveRole(input: FindAllRoleInput!): ApiResponsePaginationRoleDeleteAt!
+  findByTrashedRole(
+    input: FindAllRoleInput!
+  ): ApiResponsePaginationRoleDeleteAt!
+  findByUserIdRole(input: FindByUserIdRoleInput!): ApiResponsesRole!
+}
+
+extend type Mutation {
+  createRole(input: CreateRoleInput!): ApiResponseRole!
+  updateRole(input: UpdateRoleInput!): ApiResponseRole!
+  trashedRole(input: FindByIdRoleInput!): ApiResponseRoleDeleteAt!
+  restoreRole(input: FindByIdRoleInput!): ApiResponseRoleDeleteAt!
+  deleteRolePermanent(input: FindByIdRoleInput!): ApiResponseRoleDelete!
+  restoreAllRole: ApiResponseRoleAll!
+  deleteAllRolePermanent: ApiResponseRoleAll!
+}

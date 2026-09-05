@@ -1,0 +1,4 @@
+Sekarang saya punya gambaran lengkap. Ringkasan kondisi:
+
+Payment gateway (referensi): go.work dengan  pb/pkg/shared/tests/service/*  (13 service + migrate), seeder Go per-entitas di  pkg/database/seeder  +  seeder/seeder.sql , migrate via  service/migrate , stats ±104 endpoint diimplementasikan in-domain service (ClickHouse belum dipakai — itu target arsitektur).
+

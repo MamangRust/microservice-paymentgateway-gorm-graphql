@@ -1,0 +1,990 @@
+syntax = "proto3";
+
+package pb.stats;
+
+option go_package = "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats";
+
+// ============================================================
+// Request messages (self-contained, no imports)
+// ============================================================
+
+// Card stats requests
+message FindYearAmount { int32 year = 1; }
+
+message FindYearAmountCardNumber {
+  int32 year = 1;
+  string card_number = 2;
+}
+
+message FindYearBalance { int32 year = 1; }
+
+message FindYearBalanceCardNumber {
+  int32 year = 1;
+  string card_number = 2;
+}
+
+// Merchant stats requests
+message FindYearMerchant { int32 year = 1; }
+
+message FindYearMerchantById {
+  int32 year = 1;
+  int32 merchant_id = 2;
+}
+
+message FindYearMerchantByApikey {
+  int32 year = 1;
+  string api_key = 2;
+}
+
+// Saldo stats requests
+message FindMonthlySaldoTotalBalance {
+  int32 year = 1;
+  int32 month = 2;
+}
+
+message FindYearlySaldo { int32 year = 1; }
+
+// Topup stats requests
+message FindMonthlyTopupStatus {
+  int32 year = 1;
+  int32 month = 2;
+}
+
+message FindYearTopupStatus { int32 year = 1; }
+
+message FindMonthlyTopupStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+message FindYearTopupStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+message FindYearTopupCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+// Transaction stats requests
+message FindYearTransactionStatus { int32 year = 1; }
+
+message FindMonthlyTransactionStatus {
+  int32 year = 1;
+  int32 month = 2;
+}
+
+message FindByYearCardNumberTransactionRequest {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+message FindYearTransactionStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+message FindMonthlyTransactionStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+// Transfer stats requests
+message FindYearTransferStatus { int32 year = 1; }
+
+message FindMonthlyTransferStatus {
+  int32 year = 1;
+  int32 month = 2;
+}
+
+message FindYearTransferStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+message FindMonthlyTransferStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+message FindByCardNumberTransferRequest {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+// Withdraw stats requests
+message FindYearWithdrawStatus { int32 year = 1; }
+
+message FindMonthlyWithdrawStatus {
+  int32 year = 1;
+  int32 month = 2;
+}
+
+message FindYearWithdrawStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+message FindMonthlyWithdrawStatusCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+  int32 month = 3;
+}
+
+message FindYearWithdrawCardNumber {
+  string card_number = 1;
+  int32 year = 2;
+}
+
+// ============================================================
+// Card Stats Response Messages
+// ============================================================
+
+message CardResponseMonthlyBalance {
+  string month = 1;
+  int64 total_balance = 2;
+}
+
+message CardResponseYearlyBalance {
+  string year = 1;
+  int64 total_balance = 2;
+}
+
+message ApiResponseMonthlyBalance {
+  string status = 1;
+  string message = 2;
+  repeated CardResponseMonthlyBalance data = 3;
+}
+
+message ApiResponseYearlyBalance {
+  string status = 1;
+  string message = 2;
+  repeated CardResponseYearlyBalance data = 3;
+}
+
+message CardResponseMonthlyAmount {
+  string month = 1;
+  int64 total_amount = 2;
+}
+
+message CardResponseYearlyAmount {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseMonthlyAmount {
+  string status = 1;
+  string message = 2;
+  repeated CardResponseMonthlyAmount data = 3;
+}
+
+message ApiResponseYearlyAmount {
+  string status = 1;
+  string message = 2;
+  repeated CardResponseYearlyAmount data = 3;
+}
+
+// ============================================================
+// Merchant Stats Response Messages
+// ============================================================
+
+message MerchantResponseMonthlyAmount {
+  string month = 1;
+  int64 total_amount = 2;
+}
+
+message MerchantResponseYearlyAmount {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseMerchantMonthlyAmount {
+  string status = 1;
+  string message = 2;
+  repeated MerchantResponseMonthlyAmount data = 3;
+}
+
+message ApiResponseMerchantYearlyAmount {
+  string status = 1;
+  string message = 2;
+  repeated MerchantResponseYearlyAmount data = 3;
+}
+
+message MerchantResponseMonthlyPaymentMethod {
+  string month = 1;
+  string payment_method = 2;
+  int64 total_amount = 3;
+}
+
+message MerchantResponseYearlyPaymentMethod {
+  string year = 1;
+  string payment_method = 2;
+  int64 total_amount = 3;
+}
+
+message ApiResponseMerchantMonthlyPaymentMethod {
+  string status = 1;
+  string message = 2;
+  repeated MerchantResponseMonthlyPaymentMethod data = 3;
+}
+
+message ApiResponseMerchantYearlyPaymentMethod {
+  string status = 1;
+  string message = 2;
+  repeated MerchantResponseYearlyPaymentMethod data = 3;
+}
+
+message MerchantResponseMonthlyTotalAmount {
+  string month = 1;
+  string year = 2;
+  int64 total_amount = 3;
+}
+
+message MerchantResponseYearlyTotalAmount {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseMerchantMonthlyTotalAmount {
+  string status = 1;
+  string message = 2;
+  repeated MerchantResponseMonthlyTotalAmount data = 3;
+}
+
+message ApiResponseMerchantYearlyTotalAmount {
+  string status = 1;
+  string message = 2;
+  repeated MerchantResponseYearlyTotalAmount data = 3;
+}
+
+// ============================================================
+// Saldo Stats Response Messages
+// ============================================================
+
+message SaldoMonthBalanceResponse {
+  string month = 1;
+  int64 total_balance = 2;
+}
+
+message SaldoYearBalanceResponse {
+  string year = 1;
+  int64 total_balance = 2;
+}
+
+message ApiResponseMonthSaldoBalances {
+  string status = 1;
+  string message = 2;
+  repeated SaldoMonthBalanceResponse data = 3;
+}
+
+message ApiResponseYearSaldoBalances {
+  string status = 1;
+  string message = 2;
+  repeated SaldoYearBalanceResponse data = 3;
+}
+
+message SaldoMonthTotalBalanceResponse {
+  string month = 1;
+  string year = 2;
+  int64 total_balance = 3;
+}
+
+message SaldoYearTotalBalanceResponse {
+  string year = 1;
+  int64 total_balance = 2;
+}
+
+message ApiResponseMonthTotalSaldo {
+  string status = 1;
+  string message = 2;
+  repeated SaldoMonthTotalBalanceResponse data = 3;
+}
+
+message ApiResponseYearTotalSaldo {
+  string status = 1;
+  string message = 2;
+  repeated SaldoYearTotalBalanceResponse data = 3;
+}
+
+// ============================================================
+// Topup Stats Response Messages
+// ============================================================
+
+message TopupMonthAmountResponse {
+  string month = 1;
+  int64 total_amount = 2;
+}
+
+message TopupYearlyAmountResponse {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseTopupMonthAmount {
+  string status = 1;
+  string message = 2;
+  repeated TopupMonthAmountResponse data = 3;
+}
+
+message ApiResponseTopupYearAmount {
+  string status = 1;
+  string message = 2;
+  repeated TopupYearlyAmountResponse data = 3;
+}
+
+message TopupMonthMethodResponse {
+  string month = 1;
+  string topup_method = 2;
+  int32 total_topups = 3;
+  int64 total_amount = 4;
+}
+
+message TopupYearlyMethodResponse {
+  string year = 1;
+  string topup_method = 2;
+  int32 total_topups = 3;
+  int64 total_amount = 4;
+}
+
+message ApiResponseTopupMonthMethod {
+  string status = 1;
+  string message = 2;
+  repeated TopupMonthMethodResponse data = 3;
+}
+
+message ApiResponseTopupYearMethod {
+  string status = 1;
+  string message = 2;
+  repeated TopupYearlyMethodResponse data = 3;
+}
+
+message TopupMonthStatusSuccessResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_success = 3;
+  int64 total_amount = 4;
+}
+
+message TopupYearStatusSuccessResponse {
+  string year = 1;
+  int32 total_success = 2;
+  int64 total_amount = 4;
+}
+
+message TopupMonthStatusFailedResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_failed = 3;
+  int64 total_amount = 4;
+}
+
+message TopupYearStatusFailedResponse {
+  string year = 1;
+  int32 total_failed = 2;
+  int64 total_amount = 4;
+}
+
+message ApiResponseTopupMonthStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated TopupMonthStatusSuccessResponse data = 3;
+}
+
+message ApiResponseTopupYearStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated TopupYearStatusSuccessResponse data = 3;
+}
+
+message ApiResponseTopupMonthStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated TopupMonthStatusFailedResponse data = 3;
+}
+
+message ApiResponseTopupYearStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated TopupYearStatusFailedResponse data = 3;
+}
+
+// ============================================================
+// Transaction Stats Response Messages
+// ============================================================
+
+message TransactionMonthAmountResponse {
+  string month = 1;
+  int64 total_amount = 2;
+}
+
+message TransactionYearlyAmountResponse {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseTransactionMonthAmount {
+  string status = 1;
+  string message = 2;
+  repeated TransactionMonthAmountResponse data = 3;
+}
+
+message ApiResponseTransactionYearAmount {
+  string status = 1;
+  string message = 2;
+  repeated TransactionYearlyAmountResponse data = 3;
+}
+
+message TransactionMonthMethodResponse {
+  string month = 1;
+  string payment_method = 2;
+  int32 total_transactions = 3;
+  int64 total_amount = 4;
+}
+
+message TransactionYearMethodResponse {
+  string year = 1;
+  string payment_method = 2;
+  int32 total_transactions = 3;
+  int64 total_amount = 4;
+}
+
+message ApiResponseTransactionMonthMethod {
+  string status = 1;
+  string message = 2;
+  repeated TransactionMonthMethodResponse data = 3;
+}
+
+message ApiResponseTransactionYearMethod {
+  string status = 1;
+  string message = 2;
+  repeated TransactionYearMethodResponse data = 3;
+}
+
+message TransactionMonthStatusSuccessResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_success = 3;
+  int64 total_amount = 4;
+}
+
+message TransactionYearStatusSuccessResponse {
+  string year = 1;
+  int32 total_success = 2;
+  int64 total_amount = 4;
+}
+
+message TransactionMonthStatusFailedResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_failed = 3;
+  int64 total_amount = 4;
+}
+
+message TransactionYearStatusFailedResponse {
+  string year = 1;
+  int32 total_failed = 2;
+  int64 total_amount = 4;
+}
+
+message ApiResponseTransactionMonthStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated TransactionMonthStatusSuccessResponse data = 3;
+}
+
+message ApiResponseTransactionYearStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated TransactionYearStatusSuccessResponse data = 3;
+}
+
+message ApiResponseTransactionMonthStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated TransactionMonthStatusFailedResponse data = 3;
+}
+
+message ApiResponseTransactionYearStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated TransactionYearStatusFailedResponse data = 3;
+}
+
+// ============================================================
+// Transfer Stats Response Messages
+// ============================================================
+
+message TransferMonthAmountResponse {
+  string month = 1;
+  int64 total_amount = 2;
+}
+
+message TransferYearAmountResponse {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseTransferMonthAmount {
+  string status = 1;
+  string message = 2;
+  repeated TransferMonthAmountResponse data = 3;
+}
+
+message ApiResponseTransferYearAmount {
+  string status = 1;
+  string message = 2;
+  repeated TransferYearAmountResponse data = 3;
+}
+
+message TransferMonthStatusSuccessResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_success = 3;
+  int64 total_amount = 4;
+}
+
+message TransferYearStatusSuccessResponse {
+  string year = 1;
+  int32 total_success = 2;
+  int64 total_amount = 4;
+}
+
+message TransferMonthStatusFailedResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_failed = 3;
+  int64 total_amount = 4;
+}
+
+message TransferYearStatusFailedResponse {
+  string year = 1;
+  int32 total_failed = 2;
+  int64 total_amount = 4;
+}
+
+message ApiResponseTransferMonthStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated TransferMonthStatusSuccessResponse data = 3;
+}
+
+message ApiResponseTransferYearStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated TransferYearStatusSuccessResponse data = 3;
+}
+
+message ApiResponseTransferMonthStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated TransferMonthStatusFailedResponse data = 3;
+}
+
+message ApiResponseTransferYearStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated TransferYearStatusFailedResponse data = 3;
+}
+
+// ============================================================
+// Withdraw Stats Response Messages
+// ============================================================
+
+message WithdrawMonthlyAmountResponse {
+  string month = 1;
+  int64 total_amount = 2;
+}
+
+message WithdrawYearlyAmountResponse {
+  string year = 1;
+  int64 total_amount = 2;
+}
+
+message ApiResponseWithdrawMonthAmount {
+  string status = 1;
+  string message = 2;
+  repeated WithdrawMonthlyAmountResponse data = 3;
+}
+
+message ApiResponseWithdrawYearAmount {
+  string status = 1;
+  string message = 2;
+  repeated WithdrawYearlyAmountResponse data = 3;
+}
+
+message WithdrawMonthStatusSuccessResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_success = 3;
+  int64 total_amount = 4;
+}
+
+message WithdrawYearStatusSuccessResponse {
+  string year = 1;
+  int32 total_success = 2;
+  int64 total_amount = 4;
+}
+
+message WithdrawMonthStatusFailedResponse {
+  string year = 1;
+  string month = 2;
+  int32 total_failed = 3;
+  int64 total_amount = 4;
+}
+
+message WithdrawYearStatusFailedResponse {
+  string year = 1;
+  int32 total_failed = 2;
+  int64 total_amount = 4;
+}
+
+message ApiResponseWithdrawMonthStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated WithdrawMonthStatusSuccessResponse data = 3;
+}
+
+message ApiResponseWithdrawYearStatusSuccess {
+  string status = 1;
+  string message = 2;
+  repeated WithdrawYearStatusSuccessResponse data = 3;
+}
+
+message ApiResponseWithdrawMonthStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated WithdrawMonthStatusFailedResponse data = 3;
+}
+
+message ApiResponseWithdrawYearStatusFailed {
+  string status = 1;
+  string message = 2;
+  repeated WithdrawYearStatusFailedResponse data = 3;
+}
+
+// ============================================================
+// Card Stats Services
+// ============================================================
+
+service CardStatsBalanceService {
+  rpc FindMonthlyBalance(FindYearAmount) returns (ApiResponseMonthlyBalance) {}
+  rpc FindYearlyBalance(FindYearAmount) returns (ApiResponseYearlyBalance) {}
+
+  rpc FindMonthlyBalanceByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseMonthlyBalance) {}
+  rpc FindYearlyBalanceByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseYearlyBalance) {}
+}
+
+service CardStatsTopupService {
+  rpc FindMonthlyTopupAmount(FindYearAmount)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTopupAmount(FindYearAmount) returns (ApiResponseYearlyAmount) {}
+
+  rpc FindMonthlyTopupAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTopupAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseYearlyAmount) {}
+}
+
+service CardStatsTransactionService {
+  rpc FindMonthlyTransactionAmount(FindYearAmount)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTransactionAmount(FindYearAmount)
+      returns (ApiResponseYearlyAmount) {}
+
+  rpc FindMonthlyTransactionAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTransactionAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseYearlyAmount) {}
+}
+
+service CardStatsTransferService {
+  rpc FindMonthlyTransferSenderAmount(FindYearAmount)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTransferSenderAmount(FindYearAmount)
+      returns (ApiResponseYearlyAmount) {}
+
+  rpc FindMonthlyTransferReceiverAmount(FindYearAmount)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTransferReceiverAmount(FindYearAmount)
+      returns (ApiResponseYearlyAmount) {}
+
+  rpc FindMonthlyTransferSenderAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTransferSenderAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseYearlyAmount) {}
+
+  rpc FindMonthlyTransferReceiverAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyTransferReceiverAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseYearlyAmount) {}
+}
+
+service CardStatsWithdrawService {
+  rpc FindMonthlyWithdrawAmount(FindYearAmount)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyWithdrawAmount(FindYearAmount)
+      returns (ApiResponseYearlyAmount) {}
+
+  rpc FindMonthlyWithdrawAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseMonthlyAmount) {}
+  rpc FindYearlyWithdrawAmountByCardNumber(FindYearAmountCardNumber)
+      returns (ApiResponseYearlyAmount) {}
+}
+
+// ============================================================
+// Merchant Stats Services
+// ============================================================
+
+service MerchantStatsAmountService {
+  rpc FindMonthlyAmountMerchant(FindYearMerchant)
+      returns (ApiResponseMerchantMonthlyAmount) {}
+  rpc FindYearlyAmountMerchant(FindYearMerchant)
+      returns (ApiResponseMerchantYearlyAmount) {}
+  rpc FindMonthlyAmountByMerchants(FindYearMerchantById)
+      returns (ApiResponseMerchantMonthlyAmount) {}
+  rpc FindYearlyAmountByMerchants(FindYearMerchantById)
+      returns (ApiResponseMerchantYearlyAmount) {}
+  rpc FindMonthlyAmountByApikey(FindYearMerchantByApikey)
+      returns (ApiResponseMerchantMonthlyAmount) {}
+  rpc FindYearlyAmountByApikey(FindYearMerchantByApikey)
+      returns (ApiResponseMerchantYearlyAmount) {}
+}
+
+service MerchantStatsMethodService {
+  rpc FindMonthlyPaymentMethodsMerchant(FindYearMerchant)
+      returns (ApiResponseMerchantMonthlyPaymentMethod) {}
+  rpc FindYearlyPaymentMethodMerchant(FindYearMerchant)
+      returns (ApiResponseMerchantYearlyPaymentMethod) {}
+  rpc FindMonthlyPaymentMethodByMerchants(FindYearMerchantById)
+      returns (ApiResponseMerchantMonthlyPaymentMethod) {}
+  rpc FindYearlyPaymentMethodByMerchants(FindYearMerchantById)
+      returns (ApiResponseMerchantYearlyPaymentMethod) {}
+  rpc FindMonthlyPaymentMethodByApikey(FindYearMerchantByApikey)
+      returns (ApiResponseMerchantMonthlyPaymentMethod) {}
+  rpc FindYearlyPaymentMethodByApikey(FindYearMerchantByApikey)
+      returns (ApiResponseMerchantYearlyPaymentMethod) {}
+}
+
+service MerchantStatsTotalAmountService {
+  rpc FindMonthlyTotalAmountMerchant(FindYearMerchant)
+      returns (ApiResponseMerchantMonthlyTotalAmount) {}
+  rpc FindYearlyTotalAmountMerchant(FindYearMerchant)
+      returns (ApiResponseMerchantYearlyTotalAmount) {}
+  rpc FindMonthlyTotalAmountByMerchants(FindYearMerchantById)
+      returns (ApiResponseMerchantMonthlyTotalAmount) {}
+  rpc FindYearlyTotalAmountByMerchants(FindYearMerchantById)
+      returns (ApiResponseMerchantYearlyTotalAmount) {}
+  rpc FindMonthlyTotalAmountByApikey(FindYearMerchantByApikey)
+      returns (ApiResponseMerchantMonthlyTotalAmount) {}
+  rpc FindYearlyTotalAmountByApikey(FindYearMerchantByApikey)
+      returns (ApiResponseMerchantYearlyTotalAmount) {}
+}
+
+// ============================================================
+// Saldo Stats Services
+// ============================================================
+
+service SaldoStatsBalanceService {
+  rpc FindMonthlySaldoBalances(FindYearlySaldo)
+      returns (ApiResponseMonthSaldoBalances) {}
+  rpc FindYearlySaldoBalances(FindYearlySaldo)
+      returns (ApiResponseYearSaldoBalances) {}
+}
+
+service SaldoStatsTotalBalance {
+  rpc FindMonthlyTotalSaldoBalance(FindMonthlySaldoTotalBalance)
+      returns (ApiResponseMonthTotalSaldo) {}
+  rpc FindYearTotalSaldoBalance(FindYearlySaldo)
+      returns (ApiResponseYearTotalSaldo) {}
+}
+
+// ============================================================
+// Topup Stats Services
+// ============================================================
+
+service TopupStatsAmountService {
+  rpc FindMonthlyTopupAmounts(FindYearTopupStatus)
+      returns (ApiResponseTopupMonthAmount) {}
+  rpc FindYearlyTopupAmounts(FindYearTopupStatus)
+      returns (ApiResponseTopupYearAmount) {}
+  rpc FindMonthlyTopupAmountsByCardNumber(FindYearTopupCardNumber)
+      returns (ApiResponseTopupMonthAmount) {}
+  rpc FindYearlyTopupAmountsByCardNumber(FindYearTopupCardNumber)
+      returns (ApiResponseTopupYearAmount) {}
+}
+
+service TopupStatsMethodService {
+  rpc FindMonthlyTopupMethods(FindYearTopupStatus)
+      returns (ApiResponseTopupMonthMethod) {}
+  rpc FindYearlyTopupMethods(FindYearTopupStatus)
+      returns (ApiResponseTopupYearMethod) {}
+  rpc FindMonthlyTopupMethodsByCardNumber(FindYearTopupCardNumber)
+      returns (ApiResponseTopupMonthMethod) {}
+  rpc FindYearlyTopupMethodsByCardNumber(FindYearTopupCardNumber)
+      returns (ApiResponseTopupYearMethod) {}
+}
+
+service TopupStatsStatusService {
+  rpc FindMonthlyTopupStatusSuccess(FindMonthlyTopupStatus)
+      returns (ApiResponseTopupMonthStatusSuccess) {}
+  rpc FindYearlyTopupStatusSuccess(FindYearTopupStatus)
+      returns (ApiResponseTopupYearStatusSuccess) {}
+  rpc FindMonthlyTopupStatusFailed(FindMonthlyTopupStatus)
+      returns (ApiResponseTopupMonthStatusFailed) {}
+  rpc FindYearlyTopupStatusFailed(FindYearTopupStatus)
+      returns (ApiResponseTopupYearStatusFailed) {}
+
+  rpc FindMonthlyTopupStatusSuccessByCardNumber(
+      FindMonthlyTopupStatusCardNumber)
+      returns (ApiResponseTopupMonthStatusSuccess) {}
+  rpc FindYearlyTopupStatusSuccessByCardNumber(FindYearTopupStatusCardNumber)
+      returns (ApiResponseTopupYearStatusSuccess) {}
+  rpc FindMonthlyTopupStatusFailedByCardNumber(FindMonthlyTopupStatusCardNumber)
+      returns (ApiResponseTopupMonthStatusFailed) {}
+  rpc FindYearlyTopupStatusFailedByCardNumber(FindYearTopupStatusCardNumber)
+      returns (ApiResponseTopupYearStatusFailed) {}
+}
+
+// ============================================================
+// Transaction Stats Services
+// ============================================================
+
+service TransactionStatsAmountService {
+  rpc FindMonthlyAmounts(FindYearTransactionStatus)
+      returns (ApiResponseTransactionMonthAmount) {}
+  rpc FindYearlyAmounts(FindYearTransactionStatus)
+      returns (ApiResponseTransactionYearAmount) {}
+  rpc FindMonthlyAmountsByCardNumber(FindByYearCardNumberTransactionRequest)
+      returns (ApiResponseTransactionMonthAmount) {}
+  rpc FindYearlyAmountsByCardNumber(FindByYearCardNumberTransactionRequest)
+      returns (ApiResponseTransactionYearAmount) {}
+}
+
+service TransactionStatsMethodService {
+  rpc FindMonthlyPaymentMethods(FindYearTransactionStatus)
+      returns (ApiResponseTransactionMonthMethod) {}
+  rpc FindYearlyPaymentMethods(FindYearTransactionStatus)
+      returns (ApiResponseTransactionYearMethod) {}
+
+  rpc FindMonthlyPaymentMethodsByCardNumber(
+      FindByYearCardNumberTransactionRequest)
+      returns (ApiResponseTransactionMonthMethod) {}
+  rpc FindYearlyPaymentMethodsByCardNumber(FindByYearCardNumberTransactionRequest)
+      returns (ApiResponseTransactionYearMethod) {}
+}
+
+service TransactionStatsStatusService {
+  rpc FindMonthlyTransactionStatusSuccess(FindMonthlyTransactionStatus)
+      returns (ApiResponseTransactionMonthStatusSuccess) {}
+  rpc FindYearlyTransactionStatusSuccess(FindYearTransactionStatus)
+      returns (ApiResponseTransactionYearStatusSuccess) {}
+  rpc FindMonthlyTransactionStatusFailed(FindMonthlyTransactionStatus)
+      returns (ApiResponseTransactionMonthStatusFailed) {}
+  rpc FindYearlyTransactionStatusFailed(FindYearTransactionStatus)
+      returns (ApiResponseTransactionYearStatusFailed) {}
+
+  rpc FindMonthlyTransactionStatusSuccessByCardNumber(
+      FindMonthlyTransactionStatusCardNumber)
+      returns (ApiResponseTransactionMonthStatusSuccess) {}
+  rpc FindYearlyTransactionStatusSuccessByCardNumber(
+      FindYearTransactionStatusCardNumber)
+      returns (ApiResponseTransactionYearStatusSuccess) {}
+  rpc FindMonthlyTransactionStatusFailedByCardNumber(
+      FindMonthlyTransactionStatusCardNumber)
+      returns (ApiResponseTransactionMonthStatusFailed) {}
+  rpc FindYearlyTransactionStatusFailedByCardNumber(
+      FindYearTransactionStatusCardNumber)
+      returns (ApiResponseTransactionYearStatusFailed) {}
+}
+
+// ============================================================
+// Transfer Stats Services
+// ============================================================
+
+service TransferStatsAmountService {
+  rpc FindMonthlyTransferAmounts(FindYearTransferStatus)
+      returns (ApiResponseTransferMonthAmount) {}
+  rpc FindYearlyTransferAmounts(FindYearTransferStatus)
+      returns (ApiResponseTransferYearAmount) {}
+  rpc FindMonthlyTransferAmountsBySenderCardNumber(
+      FindByCardNumberTransferRequest)
+      returns (ApiResponseTransferMonthAmount) {}
+  rpc FindMonthlyTransferAmountsByReceiverCardNumber(
+      FindByCardNumberTransferRequest)
+      returns (ApiResponseTransferMonthAmount) {}
+
+  rpc FindYearlyTransferAmountsBySenderCardNumber(
+      FindByCardNumberTransferRequest) returns (ApiResponseTransferYearAmount) {}
+  rpc FindYearlyTransferAmountsByReceiverCardNumber(
+      FindByCardNumberTransferRequest) returns (ApiResponseTransferYearAmount) {}
+}
+
+service TransferStatsStatusService {
+  rpc FindMonthlyTransferStatusSuccess(FindMonthlyTransferStatus)
+      returns (ApiResponseTransferMonthStatusSuccess) {}
+  rpc FindYearlyTransferStatusSuccess(FindYearTransferStatus)
+      returns (ApiResponseTransferYearStatusSuccess) {}
+  rpc FindMonthlyTransferStatusFailed(FindMonthlyTransferStatus)
+      returns (ApiResponseTransferMonthStatusFailed) {}
+  rpc FindYearlyTransferStatusFailed(FindYearTransferStatus)
+      returns (ApiResponseTransferYearStatusFailed) {}
+
+  rpc FindMonthlyTransferStatusSuccessByCardNumber(
+      FindMonthlyTransferStatusCardNumber)
+      returns (ApiResponseTransferMonthStatusSuccess) {}
+  rpc FindYearlyTransferStatusSuccessByCardNumber(
+      FindYearTransferStatusCardNumber)
+      returns (ApiResponseTransferYearStatusSuccess) {}
+  rpc FindMonthlyTransferStatusFailedByCardNumber(
+      FindMonthlyTransferStatusCardNumber)
+      returns (ApiResponseTransferMonthStatusFailed) {}
+  rpc FindYearlyTransferStatusFailedByCardNumber(
+      FindYearTransferStatusCardNumber)
+      returns (ApiResponseTransferYearStatusFailed) {}
+}
+
+// ============================================================
+// Withdraw Stats Services
+// ============================================================
+
+service WithdrawStatsAmountService {
+  rpc FindMonthlyWithdraws(FindYearWithdrawStatus)
+      returns (ApiResponseWithdrawMonthAmount) {}
+  rpc FindYearlyWithdraws(FindYearWithdrawStatus)
+      returns (ApiResponseWithdrawYearAmount) {}
+
+  rpc FindMonthlyWithdrawsByCardNumber(FindYearWithdrawCardNumber)
+      returns (ApiResponseWithdrawMonthAmount) {}
+  rpc FindYearlyWithdrawsByCardNumber(FindYearWithdrawCardNumber)
+      returns (ApiResponseWithdrawYearAmount) {}
+}
+
+service WithdrawStatsStatusService {
+  rpc FindMonthlyWithdrawStatusSuccess(FindMonthlyWithdrawStatus)
+      returns (ApiResponseWithdrawMonthStatusSuccess) {}
+  rpc FindYearlyWithdrawStatusSuccess(FindYearWithdrawStatus)
+      returns (ApiResponseWithdrawYearStatusSuccess) {}
+  rpc FindMonthlyWithdrawStatusFailed(FindMonthlyWithdrawStatus)
+      returns (ApiResponseWithdrawMonthStatusFailed) {}
+  rpc FindYearlyWithdrawStatusFailed(FindYearWithdrawStatus)
+      returns (ApiResponseWithdrawYearStatusFailed) {}
+
+  rpc FindMonthlyWithdrawStatusSuccessCardNumber(
+      FindMonthlyWithdrawStatusCardNumber)
+      returns (ApiResponseWithdrawMonthStatusSuccess) {}
+  rpc FindYearlyWithdrawStatusSuccessCardNumber(
+      FindYearWithdrawStatusCardNumber)
+      returns (ApiResponseWithdrawYearStatusSuccess) {}
+  rpc FindMonthlyWithdrawStatusFailedCardNumber(
+      FindMonthlyWithdrawStatusCardNumber)
+      returns (ApiResponseWithdrawMonthStatusFailed) {}
+  rpc FindYearlyWithdrawStatusFailedCardNumber(
+      FindYearWithdrawStatusCardNumber)
+      returns (ApiResponseWithdrawYearStatusFailed) {}
+}
