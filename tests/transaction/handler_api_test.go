@@ -145,7 +145,7 @@ func (s *TransactionGraphqlHandlerTestSuite) SetupSuite() {
 	// Seed the merchant API key into the apigateway permission cache so the
 	// GraphQL ValidateMerchant step succeeds without Kafka.
 	s.Require().NoError(testhelper.SeedMerchantCache(
-		s.redisClient, log, s.merchantApiKey, strconv.Itoa(s.merchantID),
+		s.redisClient, s.merchantApiKey, strconv.Itoa(s.merchantID),
 	))
 
 	conns := &testhelper.ServiceConnections{

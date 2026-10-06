@@ -8,6 +8,7 @@ require (
 	github.com/MamangRust/microservice-payment-gateway-grpc/pb v1.0.10
 	github.com/MamangRust/microservice-payment-gateway-grpc/pkg v1.0.28
 	github.com/MamangRust/microservice-payment-gateway-grpc/shared v1.0.23
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
 	github.com/redis/go-redis/v9 v9.17.3

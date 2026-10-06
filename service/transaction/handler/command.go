@@ -6,11 +6,11 @@ import (
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/transaction/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	transaction_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/transaction_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type transactionCommandHandleGrpc struct {
@@ -58,8 +58,8 @@ func (t *transactionCommandHandleGrpc) CreateTransaction(ctx context.Context, re
 			PaymentMethod:   res.PaymentMethod,
 			MerchantId:      res.MerchantID,
 			TransactionTime: res.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(res.UpdatedAt),
+			CreatedAt:       formatTxTime(res.CreatedAt),
+			UpdatedAt:       formatTxTime(res.UpdatedAt),
 		},
 	}, nil
 }
@@ -102,8 +102,8 @@ func (t *transactionCommandHandleGrpc) UpdateTransaction(ctx context.Context, re
 			PaymentMethod:   res.PaymentMethod,
 			MerchantId:      res.MerchantID,
 			TransactionTime: res.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(res.UpdatedAt),
+			CreatedAt:       formatTxTime(res.CreatedAt),
+			UpdatedAt:       formatTxTime(res.UpdatedAt),
 		},
 	}, nil
 }
@@ -132,9 +132,9 @@ func (t *transactionCommandHandleGrpc) TrashedTransaction(ctx context.Context, r
 			PaymentMethod:   res.PaymentMethod,
 			MerchantId:      res.MerchantID,
 			TransactionTime: res.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(res.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(res.DeletedAt),
+			CreatedAt:       formatTxTime(res.CreatedAt),
+			UpdatedAt:       formatTxTime(res.UpdatedAt),
+			DeletedAt:       &wrapperspb.StringValue{Value: formatTxTime(res.DeletedAt)},
 		},
 	}, nil
 }
@@ -163,9 +163,9 @@ func (t *transactionCommandHandleGrpc) RestoreTransaction(ctx context.Context, r
 			PaymentMethod:   res.PaymentMethod,
 			MerchantId:      res.MerchantID,
 			TransactionTime: res.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(res.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(res.DeletedAt),
+			CreatedAt:       formatTxTime(res.CreatedAt),
+			UpdatedAt:       formatTxTime(res.UpdatedAt),
+			DeletedAt:       &wrapperspb.StringValue{Value: formatTxTime(res.DeletedAt)},
 		},
 	}, nil
 }

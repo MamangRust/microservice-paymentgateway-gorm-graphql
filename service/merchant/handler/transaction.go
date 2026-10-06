@@ -8,9 +8,10 @@ import (
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/service"
 	pbutils "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type merchantTransactionHandleGrpc struct {
@@ -43,6 +44,11 @@ func (s *merchantTransactionHandleGrpc) FindAllTransactionMerchant(ctx context.C
 
 	protoTransactions := make([]*pb.MerchantTransactionResponse, len(transactions))
 	for i, txn := range transactions {
+		var deletedAt *wrapperspb.StringValue
+		if txn.DeletedAt != nil {
+			deletedAt = wrapperspb.String(txn.DeletedAt.Format(time.RFC3339))
+		}
+
 		protoTransactions[i] = &pb.MerchantTransactionResponse{
 			Id:              int32(txn.TransactionID),
 			CardNumber:      txn.CardNumber,
@@ -53,7 +59,7 @@ func (s *merchantTransactionHandleGrpc) FindAllTransactionMerchant(ctx context.C
 			TransactionTime: txn.TransactionTime.Format(time.RFC3339),
 			CreatedAt:       convert.FormatTimeRFC3339(txn.CreatedAt),
 			UpdatedAt:       convert.FormatTimeRFC3339(txn.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(txn.DeletedAt),
+			DeletedAt:       deletedAt,
 		}
 	}
 
@@ -100,6 +106,11 @@ func (s *merchantTransactionHandleGrpc) FindAllTransactionByMerchant(ctx context
 
 	protoTransactions := make([]*pb.MerchantTransactionResponse, len(transactions))
 	for i, txn := range transactions {
+		var deletedAt *wrapperspb.StringValue
+		if txn.DeletedAt != nil {
+			deletedAt = wrapperspb.String(txn.DeletedAt.Format(time.RFC3339))
+		}
+
 		protoTransactions[i] = &pb.MerchantTransactionResponse{
 			Id:              int32(txn.TransactionID),
 			CardNumber:      txn.CardNumber,
@@ -110,7 +121,7 @@ func (s *merchantTransactionHandleGrpc) FindAllTransactionByMerchant(ctx context
 			TransactionTime: txn.TransactionTime.Format(time.RFC3339),
 			CreatedAt:       convert.FormatTimeRFC3339(txn.CreatedAt),
 			UpdatedAt:       convert.FormatTimeRFC3339(txn.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(txn.DeletedAt),
+			DeletedAt:       deletedAt,
 		}
 	}
 
@@ -157,6 +168,11 @@ func (s *merchantTransactionHandleGrpc) FindAllTransactionByApikey(ctx context.C
 
 	protoTransactions := make([]*pb.MerchantTransactionResponse, len(transactions))
 	for i, txn := range transactions {
+		var deletedAt *wrapperspb.StringValue
+		if txn.DeletedAt != nil {
+			deletedAt = wrapperspb.String(txn.DeletedAt.Format(time.RFC3339))
+		}
+
 		protoTransactions[i] = &pb.MerchantTransactionResponse{
 			Id:              int32(txn.TransactionID),
 			CardNumber:      txn.CardNumber,
@@ -167,7 +183,7 @@ func (s *merchantTransactionHandleGrpc) FindAllTransactionByApikey(ctx context.C
 			TransactionTime: txn.TransactionTime.Format(time.RFC3339),
 			CreatedAt:       convert.FormatTimeRFC3339(txn.CreatedAt),
 			UpdatedAt:       convert.FormatTimeRFC3339(txn.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(txn.DeletedAt),
+			DeletedAt:       deletedAt,
 		}
 	}
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/card/handler"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
@@ -212,7 +212,7 @@ func (s *CardGapiTestSuite) Test6_CardStats_MonthlyTopupAmount() {
 	now := time.Now()
 	_ = s.chConn.Exec(ctx, "TRUNCATE TABLE topup_events")
 	_ = s.chConn.Exec(ctx, `INSERT INTO topup_events (topup_id, topup_no, card_number, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?)`, 1, "TP001", "1234567890", 5000, "success", now)
-	resp, err := s.statsClient.FindMonthlyTopupAmount(ctx, &statspb.FindYearAmount{Year: int32(now.Year())})
+	resp, err := s.statsClient.FindMonthlyTopupAmount(ctx, &pb.FindYearAmount{Year: int32(now.Year())})
 	s.NoError(err)
 	s.Equal("success", resp.Status)
 }
@@ -222,7 +222,7 @@ func (s *CardGapiTestSuite) Test7_CardStats_Transaction() {
 	now := time.Now()
 	_ = s.chConn.Exec(ctx, "TRUNCATE TABLE transaction_events")
 	_ = s.chConn.Exec(ctx, `INSERT INTO transaction_events (transaction_id, transaction_no, card_number, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?)`, 1, "TX001", "1234567890", 1000, "success", now)
-	resp, err := s.transactionClient.FindMonthlyTransactionAmount(ctx, &statspb.FindYearAmount{Year: int32(now.Year())})
+	resp, err := s.transactionClient.FindMonthlyTransactionAmount(ctx, &pb.FindYearAmount{Year: int32(now.Year())})
 	s.NoError(err)
 	s.Equal("success", resp.Status)
 }
@@ -232,7 +232,7 @@ func (s *CardGapiTestSuite) Test8_CardStats_Transfer() {
 	now := time.Now()
 	_ = s.chConn.Exec(ctx, "TRUNCATE TABLE transfer_events")
 	_ = s.chConn.Exec(ctx, `INSERT INTO transfer_events (transfer_id, transfer_no, source_card, destination_card, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, 1, "TR001", "1234567890", "0987654321", 2000, "success", now)
-	resp, err := s.transferClient.FindMonthlyTransferSenderAmount(ctx, &statspb.FindYearAmount{Year: int32(now.Year())})
+	resp, err := s.transferClient.FindMonthlyTransferSenderAmount(ctx, &pb.FindYearAmount{Year: int32(now.Year())})
 	s.NoError(err)
 	s.Equal("success", resp.Status)
 }
@@ -242,7 +242,7 @@ func (s *CardGapiTestSuite) Test9_CardStats_Withdraw() {
 	now := time.Now()
 	_ = s.chConn.Exec(ctx, "TRUNCATE TABLE withdraw_events")
 	_ = s.chConn.Exec(ctx, `INSERT INTO withdraw_events (withdraw_id, withdraw_no, card_number, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?)`, 1, "WD001", "1234567890", 3000, "success", now)
-	resp, err := s.withdrawClient.FindMonthlyWithdrawAmount(ctx, &statspb.FindYearAmount{Year: int32(now.Year())})
+	resp, err := s.withdrawClient.FindMonthlyWithdrawAmount(ctx, &pb.FindYearAmount{Year: int32(now.Year())})
 	s.NoError(err)
 	s.Equal("success", resp.Status)
 }
@@ -253,10 +253,10 @@ func (s *CardGapiTestSuite) Test11_CardStats_Balance_Full() {
 	cardNumber := "1234567890"
 	_ = s.chConn.Exec(ctx, "TRUNCATE TABLE saldo_events")
 	_ = s.chConn.Exec(ctx, `INSERT INTO saldo_events (card_number, total_balance, created_at) VALUES (?, ?, ?)`, cardNumber, 10000, now)
-	respM, err := s.balanceClient.FindMonthlyBalance(ctx, &statspb.FindYearAmount{Year: int32(now.Year())})
+	respM, err := s.balanceClient.FindMonthlyBalance(ctx, &statspb.FindYearBalance{Year: int32(now.Year())})
 	s.Require().NoError(err)
 	s.Equal("success", respM.Status)
-	respY, err := s.balanceClient.FindYearlyBalance(ctx, &statspb.FindYearAmount{Year: int32(now.Year())})
+	respY, err := s.balanceClient.FindYearlyBalance(ctx, &statspb.FindYearBalance{Year: int32(now.Year())})
 	s.Require().NoError(err)
 	s.Equal("success", respY.Status)
 }
@@ -264,11 +264,11 @@ func (s *CardGapiTestSuite) Test11_CardStats_Balance_Full() {
 func (s *CardGapiTestSuite) Test12_CardStats_Topup_Full() {
 	now := time.Now()
 	cardNumber := "1234567890"
-	_, err := s.statsClient.FindYearlyTopupAmount(context.Background(), &statspb.FindYearAmount{Year: int32(now.Year())})
+	_, err := s.statsClient.FindYearlyTopupAmount(context.Background(), &pb.FindYearAmount{Year: int32(now.Year())})
 	s.NoError(err)
-	_, err = s.statsClient.FindMonthlyTopupAmountByCardNumber(context.Background(), &statspb.FindYearAmountCardNumber{Year: int32(now.Year()), CardNumber: cardNumber})
+	_, err = s.statsClient.FindMonthlyTopupAmountByCardNumber(context.Background(), &pb.FindYearAmountCardNumber{Year: int32(now.Year()), CardNumber: cardNumber})
 	s.NoError(err)
-	_, err = s.statsClient.FindYearlyTopupAmountByCardNumber(context.Background(), &statspb.FindYearAmountCardNumber{Year: int32(now.Year()), CardNumber: cardNumber})
+	_, err = s.statsClient.FindYearlyTopupAmountByCardNumber(context.Background(), &pb.FindYearAmountCardNumber{Year: int32(now.Year()), CardNumber: cardNumber})
 	s.NoError(err)
 }
 

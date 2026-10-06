@@ -6,11 +6,11 @@ import (
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	saldo_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/saldo_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type saldoCommandHandleGrpc struct {
@@ -206,6 +206,11 @@ func (s *saldoCommandHandleGrpc) TrashedSaldo(ctx context.Context, req *pb.FindB
 		return nil, errors.ToGrpcError(err)
 	}
 
+	var deletedAt *wrapperspb.StringValue
+	if saldo.DeletedAt != nil {
+		deletedAt = wrapperspb.String(saldo.DeletedAt.Format(time.RFC3339))
+	}
+
 	return &pb.ApiResponseSaldoDeleteAt{
 		Status:  "success",
 		Message: "Successfully trashed saldo record",
@@ -213,11 +218,11 @@ func (s *saldoCommandHandleGrpc) TrashedSaldo(ctx context.Context, req *pb.FindB
 			SaldoId:        saldo.SaldoID,
 			CardNumber:     saldo.CardNumber,
 			TotalBalance:   saldo.TotalBalance,
-			WithdrawTime:   convert.FormatTimeRFC3339(saldo.WithdrawTime),
+			WithdrawTime:   formatSaldoTime(saldo.WithdrawTime),
 			WithdrawAmount: saldoTimeValue(saldo.WithdrawAmount),
-			CreatedAt:      convert.FormatTimeRFC3339(saldo.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(saldo.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(saldo.DeletedAt),
+			CreatedAt:      formatSaldoTime(saldo.CreatedAt),
+			UpdatedAt:      formatSaldoTime(saldo.UpdatedAt),
+			DeletedAt:      deletedAt,
 		},
 	}, nil
 }

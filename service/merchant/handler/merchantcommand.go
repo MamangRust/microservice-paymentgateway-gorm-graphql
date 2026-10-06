@@ -2,14 +2,16 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/service"
 	pbmerchant "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	merchant_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/merchant_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type merchantCommandHandleGrpc struct {
@@ -105,6 +107,11 @@ func (s *merchantCommandHandleGrpc) TrashedMerchant(ctx context.Context, req *pb
 		return nil, errors.ToGrpcError(err)
 	}
 
+	var deletedAt *wrapperspb.StringValue
+	if merchant.DeletedAt != nil {
+		deletedAt = wrapperspb.String(merchant.DeletedAt.Format(time.RFC3339))
+	}
+
 	protoMerchant := &pbmerchant.MerchantResponseDeleteAt{
 		Id:        int32(merchant.MerchantID),
 		Name:      merchant.Name,
@@ -113,7 +120,7 @@ func (s *merchantCommandHandleGrpc) TrashedMerchant(ctx context.Context, req *pb
 		UserId:    int32(merchant.UserID),
 		CreatedAt: convert.FormatTimeRFC3339(merchant.CreatedAt),
 		UpdatedAt: convert.FormatTimeRFC3339(merchant.UpdatedAt),
-		DeletedAt: convert.TimeToWrappers(merchant.DeletedAt),
+		DeletedAt: deletedAt,
 	}
 
 	return &pbmerchant.ApiResponseMerchantDeleteAt{

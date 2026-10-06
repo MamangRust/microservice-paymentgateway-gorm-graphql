@@ -2,7 +2,7 @@ package topupapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -36,30 +36,30 @@ type TopupCommandResponseMapper interface {
 
 type TopupStatsStatusResponseMapper interface {
 	// Converts monthly successful top-up stats into an API response.
-	ToApiResponseTopupMonthStatusSuccess(s *statspb.ApiResponseTopupMonthStatusSuccess) *response.ApiResponseTopupMonthStatusSuccess
+	ToApiResponseTopupMonthStatusSuccess(s *pbstats.ApiResponseTopupMonthStatusSuccess) *response.ApiResponseTopupMonthStatusSuccess
 
 	// Converts yearly successful top-up stats into an API response.
-	ToApiResponseTopupYearStatusSuccess(s *statspb.ApiResponseTopupYearStatusSuccess) *response.ApiResponseTopupYearStatusSuccess
+	ToApiResponseTopupYearStatusSuccess(s *pbstats.ApiResponseTopupYearStatusSuccess) *response.ApiResponseTopupYearStatusSuccess
 
 	// Converts monthly failed top-up stats into an API response.
-	ToApiResponseTopupMonthStatusFailed(s *statspb.ApiResponseTopupMonthStatusFailed) *response.ApiResponseTopupMonthStatusFailed
+	ToApiResponseTopupMonthStatusFailed(s *pbstats.ApiResponseTopupMonthStatusFailed) *response.ApiResponseTopupMonthStatusFailed
 
 	// Converts yearly failed top-up stats into an API response.
-	ToApiResponseTopupYearStatusFailed(s *statspb.ApiResponseTopupYearStatusFailed) *response.ApiResponseTopupYearStatusFailed
+	ToApiResponseTopupYearStatusFailed(s *pbstats.ApiResponseTopupYearStatusFailed) *response.ApiResponseTopupYearStatusFailed
 }
 
 type TopupStatsMethodResponseMapper interface {
 	// Converts monthly top-up statistics by payment method into an API response.
-	ToApiResponseTopupMonthMethod(s *statspb.ApiResponseTopupMonthMethod) *response.ApiResponseTopupMonthMethod
+	ToApiResponseTopupMonthMethod(s *pbstats.ApiResponseTopupMonthMethod) *response.ApiResponseTopupMonthMethod
 
 	// Converts yearly top-up statistics by payment method into an API response.
-	ToApiResponseTopupYearMethod(s *statspb.ApiResponseTopupYearMethod) *response.ApiResponseTopupYearMethod
+	ToApiResponseTopupYearMethod(s *pbstats.ApiResponseTopupYearMethod) *response.ApiResponseTopupYearMethod
 }
 
 type TopupStatsAmountResponseMapper interface {
 	// Converts monthly top-up amount statistics into an API response.
-	ToApiResponseTopupMonthAmount(s *statspb.ApiResponseTopupMonthAmount) *response.ApiResponseTopupMonthAmount
+	ToApiResponseTopupMonthAmount(s *pbstats.ApiResponseTopupMonthAmount) *response.ApiResponseTopupMonthAmount
 
 	// Converts yearly top-up amount statistics into an API response.
-	ToApiResponseTopupYearAmount(s *statspb.ApiResponseTopupYearAmount) *response.ApiResponseTopupYearAmount
+	ToApiResponseTopupYearAmount(s *pbstats.ApiResponseTopupYearAmount) *response.ApiResponseTopupYearAmount
 }

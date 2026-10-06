@@ -155,7 +155,11 @@ func (r *withdrawQueryRepository) GetTodayWithdrawSumByCardNumber(ctx context.Co
 	var total int64
 	err := r.db.WithContext(ctx).
 		Model(&models.Withdraw{}).
-		Where("card_number = ? AND status IN ('success', 'pending') AND withdraw_time >= date_trunc('day', now())", cardNumber).
+		// withdraw_time is stored as the app's wall clock (TimeZone=Asia/Jakarta in
+		// the DSN) without a timezone; compare against the current Jakarta date
+		// explicitly so the daily window is consistent regardless of the DB
+		// session timezone (e.g. UTC in test containers).
+		Where("card_number = ? AND status = 'success' AND DATE(withdraw_time) = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date", cardNumber).
 		Select("COALESCE(SUM(withdraw_amount), 0)").
 		Scan(&total).Error
 	if err != nil {

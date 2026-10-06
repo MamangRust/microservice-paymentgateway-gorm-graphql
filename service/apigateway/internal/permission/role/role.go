@@ -150,11 +150,6 @@ func (p *rolePermission) CheckRole(ctx context.Context, userID int, requiredRole
 }
 
 func (p *rolePermission) sendValidationRequest(userID int, correlationID string) error {
-	if p.kafka == nil {
-		p.logger.Warn("Kafka is nil and role not in cache, cannot validate", zap.Int("user_id", userID))
-		return errors.New("role validation requires Kafka or a cached role")
-	}
-
 	payload := requests.RoleRequestPayload{
 		UserID:        userID,
 		CorrelationID: correlationID,
@@ -165,6 +160,11 @@ func (p *rolePermission) sendValidationRequest(userID int, correlationID string)
 	if err != nil {
 		p.logger.Error("Failed to encode payload", zap.Error(err), zap.String("correlation_id", correlationID))
 		return errors.New("failed to encode payload")
+	}
+
+	if p.kafka == nil {
+		p.logger.Error("Kafka client is not configured", zap.String("correlation_id", correlationID))
+		return errors.New("kafka client is not configured")
 	}
 
 	err = p.kafka.SendMessage(p.requestTopic, correlationID, data)

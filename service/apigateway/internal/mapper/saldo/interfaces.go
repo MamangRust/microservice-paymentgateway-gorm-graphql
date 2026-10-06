@@ -3,7 +3,7 @@ package saldographqlmapper
 import (
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/model"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
 )
 
 type SaldoGraphqlMapper interface {

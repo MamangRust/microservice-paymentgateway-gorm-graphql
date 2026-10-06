@@ -1,7 +1,7 @@
 package merchantapimapper
 
 import (
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -21,12 +21,12 @@ func NewMerchantStatsTotalAmountResponseMapper() MerchantStatsTotalAmountRespons
 //
 // Args:
 //
-//	ms: A pointer to a statspb.ApiResponseMerchantMonthlyTotalAmount containing the gRPC response data.
+//	ms: A pointer to a pbstats.ApiResponseMerchantMonthlyTotalAmount containing the gRPC response data.
 //
 // Returns:
 //
 //	A pointer to a response.ApiResponseMerchantMonthlyTotalAmount with mapped data.
-func (m *merchantStatsTotalAmountResponseMapper) ToApiResponseMonthlyTotalAmounts(ms *statspb.ApiResponseMerchantMonthlyTotalAmount) *response.ApiResponseMerchantMonthlyTotalAmount {
+func (m *merchantStatsTotalAmountResponseMapper) ToApiResponseMonthlyTotalAmounts(ms *pbstats.ApiResponseMerchantMonthlyTotalAmount) *response.ApiResponseMerchantMonthlyTotalAmount {
 	return &response.ApiResponseMerchantMonthlyTotalAmount{
 		Status:  ms.Status,
 		Message: ms.Message,
@@ -41,12 +41,12 @@ func (m *merchantStatsTotalAmountResponseMapper) ToApiResponseMonthlyTotalAmount
 //
 // Args:
 //
-//	ms: A pointer to a statspb.ApiResponseMerchantYearlyTotalAmount containing the gRPC response data.
+//	ms: A pointer to a pbstats.ApiResponseMerchantYearlyTotalAmount containing the gRPC response data.
 //
 // Returns:
 //
 //	A pointer to a response.ApiResponseMerchantYearlyTotalAmount with mapped data.
-func (m *merchantStatsTotalAmountResponseMapper) ToApiResponseYearlyTotalAmounts(ms *statspb.ApiResponseMerchantYearlyTotalAmount) *response.ApiResponseMerchantYearlyTotalAmount {
+func (m *merchantStatsTotalAmountResponseMapper) ToApiResponseYearlyTotalAmounts(ms *pbstats.ApiResponseMerchantYearlyTotalAmount) *response.ApiResponseMerchantYearlyTotalAmount {
 	return &response.ApiResponseMerchantYearlyTotalAmount{
 		Status:  ms.Status,
 		Message: ms.Message,
@@ -59,12 +59,12 @@ func (m *merchantStatsTotalAmountResponseMapper) ToApiResponseYearlyTotalAmounts
 //
 // Args:
 //
-//	ms: A pointer to a statspb.MerchantResponseMonthlyTotalAmount containing the gRPC response data.
+//	ms: A pointer to a pbstats.MerchantResponseMonthlyTotalAmount containing the gRPC response data.
 //
 // Returns:
 //
 //	A pointer to a response.MerchantResponseMonthlyTotalAmount with the mapped data.
-func (m *merchantStatsTotalAmountResponseMapper) mapResponseMonthlyTotalAmount(ms *statspb.MerchantResponseMonthlyTotalAmount) *response.MerchantResponseMonthlyTotalAmount {
+func (m *merchantStatsTotalAmountResponseMapper) mapResponseMonthlyTotalAmount(ms *pbstats.MerchantResponseMonthlyTotalAmount) *response.MerchantResponseMonthlyTotalAmount {
 	return &response.MerchantResponseMonthlyTotalAmount{
 		Month:       ms.Month,
 		Year:        ms.Year,
@@ -78,12 +78,12 @@ func (m *merchantStatsTotalAmountResponseMapper) mapResponseMonthlyTotalAmount(m
 //
 // Args:
 //
-//	r: A slice of pointers to statspb.MerchantResponseMonthlyTotalAmount containing the gRPC response data.
+//	r: A slice of pointers to pbstats.MerchantResponseMonthlyTotalAmount containing the gRPC response data.
 //
 // Returns:
 //
 //	A slice of pointers to response.MerchantResponseMonthlyTotalAmount with the mapped data.
-func (m *merchantStatsTotalAmountResponseMapper) mapResponsesMonthlyTotalAmount(r []*statspb.MerchantResponseMonthlyTotalAmount) []*response.MerchantResponseMonthlyTotalAmount {
+func (m *merchantStatsTotalAmountResponseMapper) mapResponsesMonthlyTotalAmount(r []*pbstats.MerchantResponseMonthlyTotalAmount) []*response.MerchantResponseMonthlyTotalAmount {
 	var responseMerchants []*response.MerchantResponseMonthlyTotalAmount
 	for _, merchant := range r {
 		responseMerchants = append(responseMerchants, m.mapResponseMonthlyTotalAmount(merchant))
@@ -97,12 +97,12 @@ func (m *merchantStatsTotalAmountResponseMapper) mapResponsesMonthlyTotalAmount(
 //
 // Args:
 //
-//	ms: A pointer to a statspb.MerchantResponseYearlyTotalAmount containing the gRPC response data.
+//	ms: A pointer to a pbstats.MerchantResponseYearlyTotalAmount containing the gRPC response data.
 //
 // Returns:
 //
 //	A pointer to a response.MerchantResponseYearlyTotalAmount with the mapped data.
-func (m *merchantStatsTotalAmountResponseMapper) mapResponseYearlyTotalAmount(ms *statspb.MerchantResponseYearlyTotalAmount) *response.MerchantResponseYearlyTotalAmount {
+func (m *merchantStatsTotalAmountResponseMapper) mapResponseYearlyTotalAmount(ms *pbstats.MerchantResponseYearlyTotalAmount) *response.MerchantResponseYearlyTotalAmount {
 	return &response.MerchantResponseYearlyTotalAmount{
 		Year:        ms.Year,
 		TotalAmount: int(ms.TotalAmount),
@@ -115,12 +115,12 @@ func (m *merchantStatsTotalAmountResponseMapper) mapResponseYearlyTotalAmount(ms
 //
 // Args:
 //
-//	r: A slice of pointers to statspb.MerchantResponseYearlyTotalAmount containing the gRPC response data.
+//	r: A slice of pointers to pbstats.MerchantResponseYearlyTotalAmount containing the gRPC response data.
 //
 // Returns:
 //
 //	A slice of pointers to response.MerchantResponseYearlyTotalAmount with the mapped data.
-func (m *merchantStatsTotalAmountResponseMapper) mapResponsesYearlyTotalAmount(r []*statspb.MerchantResponseYearlyTotalAmount) []*response.MerchantResponseYearlyTotalAmount {
+func (m *merchantStatsTotalAmountResponseMapper) mapResponsesYearlyTotalAmount(r []*pbstats.MerchantResponseYearlyTotalAmount) []*response.MerchantResponseYearlyTotalAmount {
 	var responseMerchants []*response.MerchantResponseYearlyTotalAmount
 	for _, merchant := range r {
 		responseMerchants = append(responseMerchants, m.mapResponseYearlyTotalAmount(merchant))

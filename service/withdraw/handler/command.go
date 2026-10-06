@@ -7,12 +7,12 @@ import (
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/withdraw/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	withdraw_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/withdraw_errors/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type withdrawCommandHandleGrpc struct {
@@ -50,6 +50,15 @@ func (w *withdrawCommandHandleGrpc) CreateWithdraw(ctx context.Context, req *pb.
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	if withdraw.CreatedAt != nil {
+		createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+	}
+	if withdraw.UpdatedAt != nil {
+		updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return &pb.ApiResponseWithdraw{
 		Status:  "success",
 		Message: "Successfully created withdraw",
@@ -59,8 +68,8 @@ func (w *withdrawCommandHandleGrpc) CreateWithdraw(ctx context.Context, req *pb.
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		},
 	}, nil
 }
@@ -89,6 +98,15 @@ func (w *withdrawCommandHandleGrpc) UpdateWithdraw(ctx context.Context, req *pb.
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	if withdraw.CreatedAt != nil {
+		createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+	}
+	if withdraw.UpdatedAt != nil {
+		updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return &pb.ApiResponseWithdraw{
 		Status:  "success",
 		Message: "Successfully updated withdraw",
@@ -98,8 +116,8 @@ func (w *withdrawCommandHandleGrpc) UpdateWithdraw(ctx context.Context, req *pb.
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		},
 	}, nil
 }
@@ -117,6 +135,19 @@ func (w *withdrawCommandHandleGrpc) TrashedWithdraw(ctx context.Context, req *pb
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	deletedAt := &wrapperspb.StringValue{}
+	if withdraw.CreatedAt != nil {
+		createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+	}
+	if withdraw.UpdatedAt != nil {
+		updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+	}
+	if withdraw.DeletedAt != nil {
+		deletedAt = &wrapperspb.StringValue{Value: withdraw.DeletedAt.Format(time.RFC3339)}
+	}
+
 	return &pb.ApiResponseWithdrawDeleteAt{
 		Status:  "success",
 		Message: "Successfully trashed withdraw",
@@ -126,9 +157,9 @@ func (w *withdrawCommandHandleGrpc) TrashedWithdraw(ctx context.Context, req *pb
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(withdraw.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		},
 	}, nil
 }
@@ -146,6 +177,19 @@ func (w *withdrawCommandHandleGrpc) RestoreWithdraw(ctx context.Context, req *pb
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	deletedAt := &wrapperspb.StringValue{}
+	if withdraw.CreatedAt != nil {
+		createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+	}
+	if withdraw.UpdatedAt != nil {
+		updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+	}
+	if withdraw.DeletedAt != nil {
+		deletedAt = &wrapperspb.StringValue{Value: withdraw.DeletedAt.Format(time.RFC3339)}
+	}
+
 	return &pb.ApiResponseWithdrawDeleteAt{
 		Status:  "success",
 		Message: "Successfully restored withdraw",
@@ -155,9 +199,9 @@ func (w *withdrawCommandHandleGrpc) RestoreWithdraw(ctx context.Context, req *pb
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(withdraw.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		},
 	}, nil
 }

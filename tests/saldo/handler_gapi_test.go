@@ -8,7 +8,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/handler"

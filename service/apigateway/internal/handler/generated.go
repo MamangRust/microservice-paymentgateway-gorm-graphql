@@ -43,6 +43,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	HasRole func(ctx context.Context, obj any, next graphql.Resolver, roles []string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -6926,6 +6927,26 @@ extend type Mutation {
   total_records: Int!
 }
 `, BuiltIn: false},
+	{Name: "../../graphql/directives.graphqls", Input: `"""
+Requires the authenticated user to hold at least one of the given roles.
+
+It is evaluated by the GraphQL executor (gqlgen field directive), so the check
+happens per operation rather than per HTTP request — the gateway exposes a
+single POST /query endpoint, which makes path based HTTP middlewares useless for
+role enforcement.
+
+Semantics:
+  * no authenticated user in the context -> the field passes through. The
+    authority for admitting/rejecting unauthenticated traffic is AuthMiddleware,
+    which whitelists the public operations (loginUser/registerUser/refreshToken).
+  * authenticated user without any of the listed roles -> the field fails with
+    "forbidden: role not permitted" and the operation returns no data.
+
+Role names are matched against the roles reported by the role service, for
+example "Admin" (seeded) or "ROLE_ADMIN" (e2e pre-seeded).
+"""
+directive @hasRole(roles: [String!]!) on FIELD_DEFINITION
+`, BuiltIn: false},
 	{Name: "../../graphql/merchant.graphqls", Input: `# input
 input CreateMerchantInput {
   name: String!
@@ -7288,25 +7309,26 @@ type ApiResponseRoleAll {
   message: String!
 }
 
-# queries and mutation
+# Role administration is admin-only, mirroring the REST gateway policy
+# (RequireRoles("Admin", "ROLE_ADMIN") on the role query/command routes).
 extend type Query {
-  findAllRole(input: FindAllRoleInput!): ApiResponsePaginationRole!
-  findByIdRole(input: FindByIdRoleInput!): ApiResponseRole!
-  findByActiveRole(input: FindAllRoleInput!): ApiResponsePaginationRoleDeleteAt!
+  findAllRole(input: FindAllRoleInput!): ApiResponsePaginationRole! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  findByIdRole(input: FindByIdRoleInput!): ApiResponseRole! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  findByActiveRole(input: FindAllRoleInput!): ApiResponsePaginationRoleDeleteAt! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
   findByTrashedRole(
     input: FindAllRoleInput!
-  ): ApiResponsePaginationRoleDeleteAt!
-  findByUserIdRole(input: FindByUserIdRoleInput!): ApiResponsesRole!
+  ): ApiResponsePaginationRoleDeleteAt! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  findByUserIdRole(input: FindByUserIdRoleInput!): ApiResponsesRole! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
 }
 
 extend type Mutation {
-  createRole(input: CreateRoleInput!): ApiResponseRole!
-  updateRole(input: UpdateRoleInput!): ApiResponseRole!
-  trashedRole(input: FindByIdRoleInput!): ApiResponseRoleDeleteAt!
-  restoreRole(input: FindByIdRoleInput!): ApiResponseRoleDeleteAt!
-  deleteRolePermanent(input: FindByIdRoleInput!): ApiResponseRoleDelete!
-  restoreAllRole: ApiResponseRoleAll!
-  deleteAllRolePermanent: ApiResponseRoleAll!
+  createRole(input: CreateRoleInput!): ApiResponseRole! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  updateRole(input: UpdateRoleInput!): ApiResponseRole! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  trashedRole(input: FindByIdRoleInput!): ApiResponseRoleDeleteAt! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  restoreRole(input: FindByIdRoleInput!): ApiResponseRoleDeleteAt! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  deleteRolePermanent(input: FindByIdRoleInput!): ApiResponseRoleDelete! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  restoreAllRole: ApiResponseRoleAll! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
+  deleteAllRolePermanent: ApiResponseRoleAll! @hasRole(roles: ["Admin", "ROLE_ADMIN"])
 }
 `, BuiltIn: false},
 	{Name: "../../graphql/saldo.graphqls", Input: `# Input types
@@ -8446,6 +8468,17 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "roles", ec.unmarshalNString2ᚕstringᚄ)
+	if err != nil {
+		return nil, err
+	}
+	args["roles"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createCard_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -23242,7 +23275,25 @@ func (ec *executionContext) _Mutation_createRole(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Mutation().CreateRole(ctx, fc.Args["input"].(model.CreateRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRole
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRole
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRole2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRole,
 		true,
 		true,
@@ -23291,7 +23342,25 @@ func (ec *executionContext) _Mutation_updateRole(ctx context.Context, field grap
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Mutation().UpdateRole(ctx, fc.Args["input"].(model.UpdateRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRole
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRole
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRole2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRole,
 		true,
 		true,
@@ -23340,7 +23409,25 @@ func (ec *executionContext) _Mutation_trashedRole(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Mutation().TrashedRole(ctx, fc.Args["input"].(model.FindByIDRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRoleDeleteAt
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRoleDeleteAt
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRoleDeleteAt2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRoleDeleteAt,
 		true,
 		true,
@@ -23389,7 +23476,25 @@ func (ec *executionContext) _Mutation_restoreRole(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Mutation().RestoreRole(ctx, fc.Args["input"].(model.FindByIDRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRoleDeleteAt
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRoleDeleteAt
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRoleDeleteAt2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRoleDeleteAt,
 		true,
 		true,
@@ -23438,7 +23543,25 @@ func (ec *executionContext) _Mutation_deleteRolePermanent(ctx context.Context, f
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Mutation().DeleteRolePermanent(ctx, fc.Args["input"].(model.FindByIDRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRoleDelete
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRoleDelete
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRoleDelete2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRoleDelete,
 		true,
 		true,
@@ -23484,7 +23607,25 @@ func (ec *executionContext) _Mutation_restoreAllRole(ctx context.Context, field 
 		func(ctx context.Context) (any, error) {
 			return ec.resolvers.Mutation().RestoreAllRole(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRoleAll
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRoleAll
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRoleAll2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRoleAll,
 		true,
 		true,
@@ -23519,7 +23660,25 @@ func (ec *executionContext) _Mutation_deleteAllRolePermanent(ctx context.Context
 		func(ctx context.Context) (any, error) {
 			return ec.resolvers.Mutation().DeleteAllRolePermanent(ctx)
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRoleAll
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRoleAll
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRoleAll2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRoleAll,
 		true,
 		true,
@@ -26635,7 +26794,25 @@ func (ec *executionContext) _Query_findAllRole(ctx context.Context, field graphq
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Query().FindAllRole(ctx, fc.Args["input"].(model.FindAllRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponsePaginationRole
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponsePaginationRole
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponsePaginationRole2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponsePaginationRole,
 		true,
 		true,
@@ -26686,7 +26863,25 @@ func (ec *executionContext) _Query_findByIdRole(ctx context.Context, field graph
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Query().FindByIDRole(ctx, fc.Args["input"].(model.FindByIDRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponseRole
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponseRole
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponseRole2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponseRole,
 		true,
 		true,
@@ -26735,7 +26930,25 @@ func (ec *executionContext) _Query_findByActiveRole(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Query().FindByActiveRole(ctx, fc.Args["input"].(model.FindAllRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponsePaginationRoleDeleteAt
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponsePaginationRoleDeleteAt
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponsePaginationRoleDeleteAt2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponsePaginationRoleDeleteAt,
 		true,
 		true,
@@ -26786,7 +26999,25 @@ func (ec *executionContext) _Query_findByTrashedRole(ctx context.Context, field 
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Query().FindByTrashedRole(ctx, fc.Args["input"].(model.FindAllRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponsePaginationRoleDeleteAt
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponsePaginationRoleDeleteAt
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponsePaginationRoleDeleteAt2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponsePaginationRoleDeleteAt,
 		true,
 		true,
@@ -26837,7 +27068,25 @@ func (ec *executionContext) _Query_findByUserIdRole(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Query().FindByUserIDRole(ctx, fc.Args["input"].(model.FindByUserIDRoleInput))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				roles, err := ec.unmarshalNString2ᚕstringᚄ(ctx, []any{"Admin", "ROLE_ADMIN"})
+				if err != nil {
+					var zeroVal *model.APIResponsesRole
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.APIResponsesRole
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, roles)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNApiResponsesRole2ᚖgithubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐAPIResponsesRole,
 		true,
 		true,
@@ -52925,6 +53174,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNTopupEventInput2githubᚗcomᚋMamangRustᚋmicroserviceᚑpaymentᚑgatewayᚑgrpcᚋserviceᚋapigatewayᚋinternalᚋmodelᚐTopupEventInput(ctx context.Context, v any) (model.TopupEventInput, error) {

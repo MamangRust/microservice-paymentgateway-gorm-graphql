@@ -10,6 +10,7 @@ import (
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	user_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/user_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type userCommandHandleGrpc struct {
@@ -110,6 +111,11 @@ func (s *userCommandHandleGrpc) TrashedUser(ctx context.Context, request *pb.Fin
 		return nil, errors.ToGrpcError(err)
 	}
 
+	var deletedAt *wrapperspb.StringValue
+	if user.DeletedAt != nil {
+		deletedAt = &wrapperspb.StringValue{Value: user.DeletedAt.Format("2006-01-02T15:04:05Z07:00")}
+	}
+
 	return &pb.ApiResponseUserDeleteAt{
 		Status:  "success",
 		Message: "Successfully trashed user",
@@ -120,7 +126,7 @@ func (s *userCommandHandleGrpc) TrashedUser(ctx context.Context, request *pb.Fin
 			Email:     user.Email,
 			CreatedAt: convert.FormatTimeRFC3339(user.CreatedAt),
 			UpdatedAt: convert.FormatTimeRFC3339(user.UpdatedAt),
-			DeletedAt: convert.TimeToWrappers(user.DeletedAt),
+			DeletedAt: deletedAt,
 		},
 	}, nil
 }

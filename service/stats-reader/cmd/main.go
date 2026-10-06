@@ -1,20 +1,28 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 
-	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
 	pbCardBase "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
 	pbMerchantBase "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
+	pbCard "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/card"
+	pbMerchant "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/merchant"
+	pbSaldo "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/saldo"
+	pbTopup "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/topup"
+	pbTransaction "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/transaction"
+	pbTransfer "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/transfer"
+	pbWithdraw "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/withdraw"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/clickhouse"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/dotenv"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/stats-reader/handler"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/stats-reader/repository"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -25,10 +33,23 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Failed to load configuration: %v\n", err)
 	}
 	log, _ := logger.NewLogger("stats-reader", nil)
-	
+
+	// Database harus ada dulu sebelum NewClient bisa ping (client memakai
+	// CLICKHOUSE_DATABASE sebagai default-nya).
+	if err := clickhouse.EnsureDatabase(log); err != nil {
+		log.Fatal("Failed to ensure ClickHouse database", zap.Error(err))
+	}
+
 	chConn, err := clickhouse.NewClient(log)
 	if err != nil {
 		log.Fatal("Failed to connect to ClickHouse", zap.Error(err))
+	}
+
+	// Idempotent, jadi aman dijalankan reader maupun writer: menjamin tabel
+	// tetap ada walau volume ClickHouse sudah berisi data (initdb hanya jalan
+	// saat volume kosong).
+	if err := clickhouse.ApplySchema(context.Background(), chConn, log); err != nil {
+		log.Fatal("Failed to apply ClickHouse schema", zap.Error(err))
 	}
 
 	repo := repository.NewClickHouseReaderRepository(chConn)
@@ -41,39 +62,42 @@ func main() {
 	withdrawStatsHandler := handler.NewWithdrawStatsHandler(repo, log)
 
 	grpcServer := grpc.NewServer()
-	
-	pbStats.RegisterCardStatsBalanceServiceServer(grpcServer, cardStatsHandler)
-	pbStats.RegisterCardStatsTopupServiceServer(grpcServer, cardStatsHandler)
-	pbStats.RegisterCardStatsTransactionServiceServer(grpcServer, cardStatsHandler)
-	pbStats.RegisterCardStatsTransferServiceServer(grpcServer, cardStatsHandler)
-	pbStats.RegisterCardStatsWithdrawServiceServer(grpcServer, cardStatsHandler)
+
+	pbCard.RegisterCardStatsBalanceServiceServer(grpcServer, cardStatsHandler)
+	pbCard.RegisterCardStatsTopupServiceServer(grpcServer, cardStatsHandler)
+	pbCard.RegisterCardStatsTransactionServiceServer(grpcServer, cardStatsHandler)
+	pbCard.RegisterCardStatsTransferServiceServer(grpcServer, cardStatsHandler)
+	pbCard.RegisterCardStatsWithdrawServiceServer(grpcServer, cardStatsHandler)
 	pbCardBase.RegisterCardDashboardServiceServer(grpcServer, cardStatsHandler)
 
-	pbStats.RegisterMerchantStatsAmountServiceServer(grpcServer, merchantStatsHandler)
-	pbStats.RegisterMerchantStatsMethodServiceServer(grpcServer, merchantStatsHandler)
-	pbStats.RegisterMerchantStatsTotalAmountServiceServer(grpcServer, merchantStatsHandler)
+	pbMerchant.RegisterMerchantStatsAmountServiceServer(grpcServer, merchantStatsHandler)
+	pbMerchant.RegisterMerchantStatsMethodServiceServer(grpcServer, merchantStatsHandler)
+	pbMerchant.RegisterMerchantStatsTotalAmountServiceServer(grpcServer, merchantStatsHandler)
 	pbMerchantBase.RegisterMerchantTransactionServiceServer(grpcServer, merchantStatsHandler)
 
-	pbStats.RegisterSaldoStatsBalanceServiceServer(grpcServer, saldoStatsHandler)
-	pbStats.RegisterSaldoStatsTotalBalanceServer(grpcServer, saldoStatsHandler)
+	pbSaldo.RegisterSaldoStatsBalanceServiceServer(grpcServer, saldoStatsHandler)
+	pbSaldo.RegisterSaldoStatsTotalBalanceServer(grpcServer, saldoStatsHandler)
 
-	pbStats.RegisterTopupStatsAmountServiceServer(grpcServer, topupStatsHandler)
-	pbStats.RegisterTopupStatsMethodServiceServer(grpcServer, topupStatsHandler)
-	pbStats.RegisterTopupStatsStatusServiceServer(grpcServer, topupStatsHandler)
+	pbTopup.RegisterTopupStatsAmountServiceServer(grpcServer, topupStatsHandler)
+	pbTopup.RegisterTopupStatsMethodServiceServer(grpcServer, topupStatsHandler)
+	pbTopup.RegisterTopupStatsStatusServiceServer(grpcServer, topupStatsHandler)
 
-	pbStats.RegisterTransactionStatsAmountServiceServer(grpcServer, transactionStatsHandler)
-	pbStats.RegisterTransactionStatsMethodServiceServer(grpcServer, transactionStatsHandler)
-	pbStats.RegisterTransactionStatsStatusServiceServer(grpcServer, transactionStatsHandler)
+	pbTransaction.RegisterTransactionStatsAmountServiceServer(grpcServer, transactionStatsHandler)
+	pbTransaction.RegisterTransactionStatsMethodServiceServer(grpcServer, transactionStatsHandler)
+	pbTransaction.RegisterTransactionStatsStatusServiceServer(grpcServer, transactionStatsHandler)
 
-	pbStats.RegisterTransferStatsAmountServiceServer(grpcServer, transferStatsHandler)
-	pbStats.RegisterTransferStatsStatusServiceServer(grpcServer, transferStatsHandler)
+	pbTransfer.RegisterTransferStatsAmountServiceServer(grpcServer, transferStatsHandler)
+	pbTransfer.RegisterTransferStatsStatusServiceServer(grpcServer, transferStatsHandler)
 
-	pbStats.RegisterWithdrawStatsAmountServiceServer(grpcServer, withdrawStatsHandler)
-	pbStats.RegisterWithdrawStatsStatusServiceServer(grpcServer, withdrawStatsHandler)
+	pbWithdraw.RegisterWithdrawStatsAmountServiceServer(grpcServer, withdrawStatsHandler)
+	pbWithdraw.RegisterWithdrawStatsStatusServiceServer(grpcServer, withdrawStatsHandler)
 
 	reflection.Register(grpcServer)
 
-	port := ":50062"
+	port := viper.GetString("STATS_READER_LISTEN_ADDR")
+	if port == "" {
+		port = ":50062"
+	}
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatal("Failed to listen", zap.Error(err))

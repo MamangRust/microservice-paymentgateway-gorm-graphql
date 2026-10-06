@@ -2,15 +2,16 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/database/models"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/card/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	card_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/card_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type cardCommandService struct {
@@ -86,6 +87,11 @@ func (s *cardCommandService) TrashedCard(ctx context.Context, req *pb.FindByIdCa
 		return nil, errors.ToGrpcError(err)
 	}
 
+	var deletedAt *wrapperspb.StringValue
+	if res.DeletedAt != nil {
+		deletedAt = wrapperspb.String(res.DeletedAt.Format(time.RFC3339))
+	}
+
 	return &pb.ApiResponseCardDeleteAt{
 		Status:  "success",
 		Message: "Successfully trashed card",
@@ -96,9 +102,9 @@ func (s *cardCommandService) TrashedCard(ctx context.Context, req *pb.FindByIdCa
 			CardType:   res.CardType,
 			Cvv:        res.Cvv,
 			ExpireDate: formatCardTimeTim(res.ExpireDate),
-			CreatedAt:  convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:  convert.FormatTimeRFC3339(res.UpdatedAt),
-			DeletedAt:  convert.TimeToWrappers(res.DeletedAt),
+			CreatedAt:  formatCardTime(res.CreatedAt),
+			UpdatedAt:  formatCardTime(res.UpdatedAt),
+			DeletedAt:  deletedAt,
 		},
 	}, nil
 }
@@ -124,8 +130,8 @@ func (s *cardCommandService) RestoreCard(ctx context.Context, req *pb.FindByIdCa
 			CardType:   res.CardType,
 			Cvv:        res.Cvv,
 			ExpireDate: formatCardTimeTim(res.ExpireDate),
-			CreatedAt:  convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:  convert.FormatTimeRFC3339(res.UpdatedAt),
+			CreatedAt:  formatCardTime(res.CreatedAt),
+			UpdatedAt:  formatCardTime(res.UpdatedAt),
 		},
 	}, nil
 }
@@ -221,8 +227,9 @@ func cardResponse(res *models.Card) *pb.CardResponse {
 		CardType:     res.CardType,
 		CardProvider: res.CardProvider,
 		Cvv:          res.Cvv,
-		ExpireDate:   formatCardTimeTim(res.ExpireDate),			CreatedAt:          convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:          convert.FormatTimeRFC3339(res.UpdatedAt),
+		ExpireDate:   formatCardTimeTim(res.ExpireDate),
+		CreatedAt:    formatCardTime(res.CreatedAt),
+		UpdatedAt:    formatCardTime(res.UpdatedAt),
 	}
 }
 
@@ -239,7 +246,7 @@ func cardResponseFull(res *models.Card) *pb.CardResponse {
 		CreditLimit:        res.CreditLimit,
 		OutstandingBalance: int32(res.OutstandingBalance),
 		RewardPoints:       res.RewardPoints,
-		CreatedAt:          convert.FormatTimeRFC3339(res.CreatedAt),
-		UpdatedAt:          convert.FormatTimeRFC3339(res.UpdatedAt),
+		CreatedAt:          formatCardTime(res.CreatedAt),
+		UpdatedAt:          formatCardTime(res.UpdatedAt),
 	}
 }

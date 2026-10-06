@@ -12,7 +12,11 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card/stats"
+	transactionstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction/stats"
+	withdrawstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw/stats"
+	transferstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer/stats"
+	topupstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	testhelper "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/testhelper"
 	cardhandler "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/handler"
@@ -107,16 +111,16 @@ func (s *CardGraphqlHandlerTestSuite) SetupSuite() {
 	pb.RegisterCardDashboardServiceServer(server, cardStatsHandler)
 
 	// Register domain-wide stats services so GraphQL stats queries work.
-	statspb.RegisterTopupStatsAmountServiceServer(server, stats_handler.NewTopupStatsHandler(chRepo, log))
-	statspb.RegisterTopupStatsMethodServiceServer(server, stats_handler.NewTopupStatsHandler(chRepo, log))
-	statspb.RegisterTopupStatsStatusServiceServer(server, stats_handler.NewTopupStatsHandler(chRepo, log))
-	statspb.RegisterTransactionStatsAmountServiceServer(server, stats_handler.NewTransactionStatsHandler(chRepo, log))
-	statspb.RegisterTransactionStatsMethodServiceServer(server, stats_handler.NewTransactionStatsHandler(chRepo, log))
-	statspb.RegisterTransactionStatsStatusServiceServer(server, stats_handler.NewTransactionStatsHandler(chRepo, log))
-	statspb.RegisterTransferStatsAmountServiceServer(server, stats_handler.NewTransferStatsHandler(chRepo, log))
-	statspb.RegisterTransferStatsStatusServiceServer(server, stats_handler.NewTransferStatsHandler(chRepo, log))
-	statspb.RegisterWithdrawStatsAmountServiceServer(server, stats_handler.NewWithdrawStatsHandler(chRepo, log))
-	statspb.RegisterWithdrawStatsStatusServiceServer(server, stats_handler.NewWithdrawStatsHandler(chRepo, log))
+	topupstats.RegisterTopupStatsAmountServiceServer(server, stats_handler.NewTopupStatsHandler(chRepo, log))
+	topupstats.RegisterTopupStatsMethodServiceServer(server, stats_handler.NewTopupStatsHandler(chRepo, log))
+	topupstats.RegisterTopupStatsStatusServiceServer(server, stats_handler.NewTopupStatsHandler(chRepo, log))
+	transactionstats.RegisterTransactionStatsAmountServiceServer(server, stats_handler.NewTransactionStatsHandler(chRepo, log))
+	transactionstats.RegisterTransactionStatsMethodServiceServer(server, stats_handler.NewTransactionStatsHandler(chRepo, log))
+	transactionstats.RegisterTransactionStatsStatusServiceServer(server, stats_handler.NewTransactionStatsHandler(chRepo, log))
+	transferstats.RegisterTransferStatsAmountServiceServer(server, stats_handler.NewTransferStatsHandler(chRepo, log))
+	transferstats.RegisterTransferStatsStatusServiceServer(server, stats_handler.NewTransferStatsHandler(chRepo, log))
+	withdrawstats.RegisterWithdrawStatsAmountServiceServer(server, stats_handler.NewWithdrawStatsHandler(chRepo, log))
+	withdrawstats.RegisterWithdrawStatsStatusServiceServer(server, stats_handler.NewWithdrawStatsHandler(chRepo, log))
 	s.grpcServer = server
 
 	lis, err := net.Listen("tcp", "localhost:0")

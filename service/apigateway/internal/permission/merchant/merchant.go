@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	mencache "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/redis"
-
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/kafka"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/google/uuid"
@@ -17,7 +15,6 @@ import (
 
 type merchantPermission struct {
 	kafka         *kafka.Kafka
-	cache         mencache.MerchantCache
 	logger        logger.LoggerInterface
 	requestTopic  string
 	responseTopic string
@@ -31,11 +28,9 @@ func NewMerchantPermission(
 	requestTopic, responseTopic string,
 	timeout time.Duration,
 	logger logger.LoggerInterface,
-	cache mencache.MerchantCache,
 ) MerchantPermission {
 	p := &merchantPermission{
 		kafka:         k,
-		cache:         cache,
 		requestTopic:  requestTopic,
 		responseTopic: responseTopic,
 		timeout:       timeout,
@@ -60,22 +55,6 @@ func NewMerchantPermission(
 
 func (p *merchantPermission) ValidateMerchant(ctx context.Context, apiKey string) (map[string]interface{}, error) {
 	p.logger.Debug("Validating merchant API key")
-
-	// Cache-first: avoid a Kafka round-trip when the API key was already validated.
-	if p.cache != nil {
-		if merchantID, found := p.cache.GetMerchantCache(ctx, apiKey); found {
-			p.logger.Info("Merchant API key found in cache", zap.String("api_key", apiKey), zap.String("merchant_id", merchantID))
-			return map[string]interface{}{
-				"valid":      true,
-				"merchant_id": merchantID,
-			}, nil
-		}
-	}
-
-	if p.kafka == nil {
-		p.logger.Warn("Kafka is nil and merchant API key not in cache, cannot validate", zap.String("api_key", apiKey))
-		return nil, errors.New("merchant validation requires Kafka or a cached API key")
-	}
 
 	correlationID := uuid.NewString()
 	p.logger.Info("Validating merchant via Kafka", zap.String("correlation_id", correlationID))
@@ -135,6 +114,11 @@ func (p *merchantPermission) sendMerchantValidationRequest(apiKey string, correl
 	if err != nil {
 		p.logger.Error("Failed to encode payload", zap.Error(err), zap.String("correlation_id", correlationID))
 		return errors.New("failed to encode payload")
+	}
+
+	if p.kafka == nil {
+		p.logger.Error("Kafka client is not configured", zap.String("correlation_id", correlationID))
+		return errors.New("kafka client is not configured")
 	}
 
 	err = p.kafka.SendMessage(p.requestTopic, correlationID, data)

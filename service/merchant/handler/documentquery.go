@@ -3,14 +3,15 @@ package handler
 import (
 	"context"
 	"math"
+	"time"
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/service"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pbdocument "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant_document"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	merchantdocument_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/merchant_document_errors/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type merchantDocumentQueryHandleGrpc struct {
@@ -22,6 +23,12 @@ func NewMerchantDocumentQueryHandleGrpc(merchantQuery service.MerchantDocumentQu
 	return &merchantDocumentQueryHandleGrpc{merchantDocumentQuery: merchantQuery}
 }
 
+func formatDocTimePtr(tp *time.Time) string {
+	if tp == nil {
+		return ""
+	}
+	return tp.Format(time.RFC3339)
+}
 
 func (s *merchantDocumentQueryHandleGrpc) FindAll(ctx context.Context, req *pbdocument.FindAllMerchantDocumentsRequest) (*pbdocument.ApiResponsePaginationMerchantDocument, error) {
 	page := int(req.GetPage())
@@ -51,8 +58,8 @@ func (s *merchantDocumentQueryHandleGrpc) FindAll(ctx context.Context, req *pbdo
 			DocumentUrl:  doc.DocumentUrl,
 			Status:       doc.Status,
 			Note:         StringValue(doc.Note),
-			UploadedAt:   convert.FormatTimeRFC3339(doc.UploadedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(doc.UpdatedAt),
+			UploadedAt:   formatDocTimePtr(doc.UploadedAt),
+			UpdatedAt:    formatDocTimePtr(doc.UpdatedAt),
 		})
 	}
 
@@ -91,8 +98,8 @@ func (s *merchantDocumentQueryHandleGrpc) FindById(ctx context.Context, req *pbd
 		DocumentUrl:  doc.DocumentUrl,
 		Status:       doc.Status,
 		Note:         StringValue(doc.Note),
-		UploadedAt:   convert.FormatTimeRFC3339(doc.UploadedAt),
-		UpdatedAt:    convert.FormatTimeRFC3339(doc.UpdatedAt),
+		UploadedAt:   formatDocTimePtr(doc.UploadedAt),
+		UpdatedAt:    formatDocTimePtr(doc.UpdatedAt),
 	}
 
 	return &pbdocument.ApiResponseMerchantDocument{
@@ -130,8 +137,8 @@ func (s *merchantDocumentQueryHandleGrpc) FindAllActive(ctx context.Context, req
 			DocumentUrl:  doc.DocumentUrl,
 			Status:       doc.Status,
 			Note:         StringValue(doc.Note),
-			UploadedAt:   convert.FormatTimeRFC3339(doc.UploadedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(doc.UpdatedAt),
+			UploadedAt:   formatDocTimePtr(doc.UploadedAt),
+			UpdatedAt:    formatDocTimePtr(doc.UpdatedAt),
 		})
 	}
 
@@ -172,6 +179,11 @@ func (s *merchantDocumentQueryHandleGrpc) FindAllTrashed(ctx context.Context, re
 
 	var protoDocuments []*pbdocument.MerchantDocumentDeleteAt
 	for _, doc := range documents {
+		var deletedAt *wrapperspb.StringValue
+		if doc.DeletedAt != nil {
+			deletedAt = wrapperspb.String(doc.DeletedAt.Format(time.RFC3339))
+		}
+
 		protoDocuments = append(protoDocuments, &pbdocument.MerchantDocumentDeleteAt{
 			DocumentId:   int32(doc.DocumentID),
 			MerchantId:   int32(doc.MerchantID),
@@ -179,9 +191,9 @@ func (s *merchantDocumentQueryHandleGrpc) FindAllTrashed(ctx context.Context, re
 			DocumentUrl:  doc.DocumentUrl,
 			Status:       doc.Status,
 			Note:         StringValue(doc.Note),
-			UploadedAt:   convert.FormatTimeRFC3339(doc.UploadedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(doc.UpdatedAt),
-			DeletedAt:    convert.TimeToWrappers(doc.DeletedAt),
+			UploadedAt:   formatDocTimePtr(doc.UploadedAt),
+			UpdatedAt:    formatDocTimePtr(doc.UpdatedAt),
+			DeletedAt:    deletedAt,
 		})
 	}
 

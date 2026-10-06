@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"math"
+	"time"
 
 	pbutils "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	user_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/user_errors/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type userQueryHandleGrpc struct {
@@ -143,6 +145,10 @@ func (s *userQueryHandleGrpc) FindByActive(ctx context.Context, request *pb.Find
 
 	userResponses := make([]*pb.UserResponseDeleteAt, len(users))
 	for i, user := range users {
+		var deletedAt *wrapperspb.StringValue
+		if user.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: user.DeletedAt.Format(time.RFC3339)}
+		}
 		userResponses[i] = &pb.UserResponseDeleteAt{
 			Id:        user.UserID,
 			Firstname: user.Firstname,
@@ -150,7 +156,7 @@ func (s *userQueryHandleGrpc) FindByActive(ctx context.Context, request *pb.Find
 			Email:     user.Email,
 			CreatedAt: convert.FormatTimeRFC3339(user.CreatedAt),
 			UpdatedAt: convert.FormatTimeRFC3339(user.UpdatedAt),
-			DeletedAt: convert.TimeToWrappers(user.DeletedAt),
+			DeletedAt: deletedAt,
 		}
 	}
 
@@ -197,6 +203,10 @@ func (s *userQueryHandleGrpc) FindByTrashed(ctx context.Context, request *pb.Fin
 
 	userResponses := make([]*pb.UserResponseDeleteAt, len(users))
 	for i, user := range users {
+		var deletedAt *wrapperspb.StringValue
+		if user.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: user.DeletedAt.Format(time.RFC3339)}
+		}
 		userResponses[i] = &pb.UserResponseDeleteAt{
 			Id:        user.UserID,
 			Firstname: user.Firstname,
@@ -204,7 +214,7 @@ func (s *userQueryHandleGrpc) FindByTrashed(ctx context.Context, request *pb.Fin
 			Email:     user.Email,
 			CreatedAt: convert.FormatTimeRFC3339(user.CreatedAt),
 			UpdatedAt: convert.FormatTimeRFC3339(user.UpdatedAt),
-			DeletedAt: convert.TimeToWrappers(user.DeletedAt),
+			DeletedAt: deletedAt,
 		}
 	}
 

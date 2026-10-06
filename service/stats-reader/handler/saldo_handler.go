@@ -3,7 +3,8 @@ package handler
 import (
 	"context"
 
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
+	pbSaldoStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/saldo"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/stats-reader/repository"
 )
@@ -16,8 +17,8 @@ type SaldoRepository interface {
 }
 
 type SaldoStatsHandler struct {
-	statspb.UnimplementedSaldoStatsBalanceServiceServer
-	statspb.UnimplementedSaldoStatsTotalBalanceServer
+	pbSaldoStats.UnimplementedSaldoStatsBalanceServiceServer
+	pbSaldoStats.UnimplementedSaldoStatsTotalBalanceServer
 	repo SaldoRepository
 	log  logger.LoggerInterface
 }
@@ -31,24 +32,24 @@ func NewSaldoStatsHandler(repo SaldoRepository, log logger.LoggerInterface) *Sal
 
 // --- Saldo Stats Balance Service ---
 
-func (h *SaldoStatsHandler) FindMonthlySaldoBalances(ctx context.Context, req *statspb.FindYearlySaldo) (*statspb.ApiResponseMonthSaldoBalances, error) {
+func (h *SaldoStatsHandler) FindMonthlySaldoBalances(ctx context.Context, req *saldo.FindYearlySaldo) (*pbSaldoStats.ApiResponseMonthSaldoBalances, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "saldo_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMonthSaldoBalances{
+	return &pbSaldoStats.ApiResponseMonthSaldoBalances{
 		Status:  "success",
 		Message: "Retrieved monthly saldo balances",
 		Data:    h.mapToSaldoMonthBalanceData(data),
 	}, nil
 }
 
-func (h *SaldoStatsHandler) FindYearlySaldoBalances(ctx context.Context, req *statspb.FindYearlySaldo) (*statspb.ApiResponseYearSaldoBalances, error) {
+func (h *SaldoStatsHandler) FindYearlySaldoBalances(ctx context.Context, req *saldo.FindYearlySaldo) (*pbSaldoStats.ApiResponseYearSaldoBalances, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "saldo_events", "", nil, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseYearSaldoBalances{
+	return &pbSaldoStats.ApiResponseYearSaldoBalances{
 		Status:  "success",
 		Message: "Retrieved yearly saldo balances",
 		Data:    h.mapToSaldoYearBalanceData(data),
@@ -57,24 +58,24 @@ func (h *SaldoStatsHandler) FindYearlySaldoBalances(ctx context.Context, req *st
 
 // --- Saldo Stats Total Balance Service ---
 
-func (h *SaldoStatsHandler) FindMonthlyTotalSaldoBalance(ctx context.Context, req *statspb.FindMonthlySaldoTotalBalance) (*statspb.ApiResponseMonthTotalSaldo, error) {
+func (h *SaldoStatsHandler) FindMonthlyTotalSaldoBalance(ctx context.Context, req *saldo.FindMonthlySaldoTotalBalance) (*pbSaldoStats.ApiResponseMonthTotalSaldo, error) {
 	data, err := h.repo.GetMonthlyTotalSaldo(ctx, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMonthTotalSaldo{
+	return &pbSaldoStats.ApiResponseMonthTotalSaldo{
 		Status:  "success",
 		Message: "Retrieved monthly total saldo",
 		Data:    h.mapToSaldoMonthTotalData(data),
 	}, nil
 }
 
-func (h *SaldoStatsHandler) FindYearTotalSaldoBalance(ctx context.Context, req *statspb.FindYearlySaldo) (*statspb.ApiResponseYearTotalSaldo, error) {
+func (h *SaldoStatsHandler) FindYearTotalSaldoBalance(ctx context.Context, req *saldo.FindYearlySaldo) (*pbSaldoStats.ApiResponseYearTotalSaldo, error) {
 	data, err := h.repo.GetYearlyTotalSaldo(ctx, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseYearTotalSaldo{
+	return &pbSaldoStats.ApiResponseYearTotalSaldo{
 		Status:  "success",
 		Message: "Retrieved yearly total saldo",
 		Data:    h.mapToSaldoYearTotalData(data),
@@ -84,10 +85,10 @@ func (h *SaldoStatsHandler) FindYearTotalSaldoBalance(ctx context.Context, req *
 
 // --- Mappers ---
 
-func (h *SaldoStatsHandler) mapToSaldoMonthBalanceData(data []repository.MonthlyAmount) []*statspb.SaldoMonthBalanceResponse {
-	var results []*statspb.SaldoMonthBalanceResponse
+func (h *SaldoStatsHandler) mapToSaldoMonthBalanceData(data []repository.MonthlyAmount) []*pbSaldoStats.SaldoMonthBalanceResponse {
+	var results []*pbSaldoStats.SaldoMonthBalanceResponse
 	for _, d := range data {
-		results = append(results, &statspb.SaldoMonthBalanceResponse{
+		results = append(results, &pbSaldoStats.SaldoMonthBalanceResponse{
 			Month:        d.Month,
 			TotalBalance: d.TotalAmount,
 		})
@@ -95,10 +96,10 @@ func (h *SaldoStatsHandler) mapToSaldoMonthBalanceData(data []repository.Monthly
 	return results
 }
 
-func (h *SaldoStatsHandler) mapToSaldoYearBalanceData(data []repository.YearlyAmount) []*statspb.SaldoYearBalanceResponse {
-	var results []*statspb.SaldoYearBalanceResponse
+func (h *SaldoStatsHandler) mapToSaldoYearBalanceData(data []repository.YearlyAmount) []*pbSaldoStats.SaldoYearBalanceResponse {
+	var results []*pbSaldoStats.SaldoYearBalanceResponse
 	for _, d := range data {
-		results = append(results, &statspb.SaldoYearBalanceResponse{
+		results = append(results, &pbSaldoStats.SaldoYearBalanceResponse{
 			Year:         d.Year,
 			TotalBalance: d.TotalAmount,
 		})
@@ -106,10 +107,10 @@ func (h *SaldoStatsHandler) mapToSaldoYearBalanceData(data []repository.YearlyAm
 	return results
 }
 
-func (h *SaldoStatsHandler) mapToSaldoMonthTotalData(data []repository.MonthlyAmount) []*statspb.SaldoMonthTotalBalanceResponse {
-	var results []*statspb.SaldoMonthTotalBalanceResponse
+func (h *SaldoStatsHandler) mapToSaldoMonthTotalData(data []repository.MonthlyAmount) []*pbSaldoStats.SaldoMonthTotalBalanceResponse {
+	var results []*pbSaldoStats.SaldoMonthTotalBalanceResponse
 	for _, d := range data {
-		results = append(results, &statspb.SaldoMonthTotalBalanceResponse{
+		results = append(results, &pbSaldoStats.SaldoMonthTotalBalanceResponse{
 			Month:        d.Month,
 			Year:         d.Year,
 			TotalBalance: d.TotalAmount,
@@ -118,10 +119,10 @@ func (h *SaldoStatsHandler) mapToSaldoMonthTotalData(data []repository.MonthlyAm
 	return results
 }
 
-func (h *SaldoStatsHandler) mapToSaldoYearTotalData(data []repository.YearlyAmount) []*statspb.SaldoYearTotalBalanceResponse {
-	var results []*statspb.SaldoYearTotalBalanceResponse
+func (h *SaldoStatsHandler) mapToSaldoYearTotalData(data []repository.YearlyAmount) []*pbSaldoStats.SaldoYearTotalBalanceResponse {
+	var results []*pbSaldoStats.SaldoYearTotalBalanceResponse
 	for _, d := range data {
-		results = append(results, &statspb.SaldoYearTotalBalanceResponse{
+		results = append(results, &pbSaldoStats.SaldoYearTotalBalanceResponse{
 			Year:         d.Year,
 			TotalBalance: d.TotalAmount,
 		})

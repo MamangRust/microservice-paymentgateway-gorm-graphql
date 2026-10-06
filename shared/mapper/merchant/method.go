@@ -1,7 +1,7 @@
 package merchantapimapper
 
 import (
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -26,7 +26,7 @@ func NewMerchantStatsMethodResponseMapper() MerchantStatsMethodResponseMapper {
 // Returns:
 //
 //	A pointer to a response.ApiResponseMerchantMonthlyPaymentMethod with mapped data.
-func (m *merchantStatsMethodResponseMapper) ToApiResponseMonthlyPaymentMethods(ms *statspb.ApiResponseMerchantMonthlyPaymentMethod) *response.ApiResponseMerchantMonthlyPaymentMethod {
+func (m *merchantStatsMethodResponseMapper) ToApiResponseMonthlyPaymentMethods(ms *pbstats.ApiResponseMerchantMonthlyPaymentMethod) *response.ApiResponseMerchantMonthlyPaymentMethod {
 	return &response.ApiResponseMerchantMonthlyPaymentMethod{
 		Status:  ms.Status,
 		Message: ms.Message,
@@ -46,7 +46,7 @@ func (m *merchantStatsMethodResponseMapper) ToApiResponseMonthlyPaymentMethods(m
 // Returns:
 //
 //	A pointer to a response.ApiResponseMerchantYearlyPaymentMethod with mapped data.
-func (m *merchantStatsMethodResponseMapper) ToApiResponseYearlyPaymentMethods(ms *statspb.ApiResponseMerchantYearlyPaymentMethod) *response.ApiResponseMerchantYearlyPaymentMethod {
+func (m *merchantStatsMethodResponseMapper) ToApiResponseYearlyPaymentMethods(ms *pbstats.ApiResponseMerchantYearlyPaymentMethod) *response.ApiResponseMerchantYearlyPaymentMethod {
 	return &response.ApiResponseMerchantYearlyPaymentMethod{
 		Status:  ms.Status,
 		Message: ms.Message,
@@ -65,7 +65,7 @@ func (m *merchantStatsMethodResponseMapper) ToApiResponseYearlyPaymentMethods(ms
 // Returns:
 //
 //	A pointer to a response.MerchantResponseMonthlyPaymentMethod with the mapped data.
-func (m *merchantStatsMethodResponseMapper) mapResponseMonthlyPaymentMethod(ms *statspb.MerchantResponseMonthlyPaymentMethod) *response.MerchantResponseMonthlyPaymentMethod {
+func (m *merchantStatsMethodResponseMapper) mapResponseMonthlyPaymentMethod(ms *pbstats.MerchantResponseMonthlyPaymentMethod) *response.MerchantResponseMonthlyPaymentMethod {
 	return &response.MerchantResponseMonthlyPaymentMethod{
 		Month:         ms.Month,
 		PaymentMethod: ms.PaymentMethod,
@@ -84,7 +84,7 @@ func (m *merchantStatsMethodResponseMapper) mapResponseMonthlyPaymentMethod(ms *
 // Returns:
 //
 //	A slice of pointers to response.MerchantResponseMonthlyPaymentMethod with the mapped data.
-func (m *merchantStatsMethodResponseMapper) mapResponsesMonthlyPaymentMethod(r []*statspb.MerchantResponseMonthlyPaymentMethod) []*response.MerchantResponseMonthlyPaymentMethod {
+func (m *merchantStatsMethodResponseMapper) mapResponsesMonthlyPaymentMethod(r []*pbstats.MerchantResponseMonthlyPaymentMethod) []*response.MerchantResponseMonthlyPaymentMethod {
 	var responseMerchants []*response.MerchantResponseMonthlyPaymentMethod
 	for _, merchant := range r {
 		responseMerchants = append(responseMerchants, m.mapResponseMonthlyPaymentMethod(merchant))
@@ -104,7 +104,7 @@ func (m *merchantStatsMethodResponseMapper) mapResponsesMonthlyPaymentMethod(r [
 // Returns:
 //
 //	A pointer to a response.MerchantResponseYearlyPaymentMethod with the mapped data.
-func (m *merchantStatsMethodResponseMapper) mapResponseYearlyPaymentMethod(ms *statspb.MerchantResponseYearlyPaymentMethod) *response.MerchantResponseYearlyPaymentMethod {
+func (m *merchantStatsMethodResponseMapper) mapResponseYearlyPaymentMethod(ms *pbstats.MerchantResponseYearlyPaymentMethod) *response.MerchantResponseYearlyPaymentMethod {
 	return &response.MerchantResponseYearlyPaymentMethod{
 		Year:          ms.Year,
 		PaymentMethod: ms.PaymentMethod,
@@ -123,7 +123,7 @@ func (m *merchantStatsMethodResponseMapper) mapResponseYearlyPaymentMethod(ms *s
 // Returns:
 //
 //	A slice of pointers to response.MerchantResponseYearlyPaymentMethod with the mapped data.
-func (m *merchantStatsMethodResponseMapper) mapResponsesYearlyPaymentMethod(r []*statspb.MerchantResponseYearlyPaymentMethod) []*response.MerchantResponseYearlyPaymentMethod {
+func (m *merchantStatsMethodResponseMapper) mapResponsesYearlyPaymentMethod(r []*pbstats.MerchantResponseYearlyPaymentMethod) []*response.MerchantResponseYearlyPaymentMethod {
 	var responseMerchants []*response.MerchantResponseYearlyPaymentMethod
 	for _, merchant := range r {
 		responseMerchants = append(responseMerchants, m.mapResponseYearlyPaymentMethod(merchant))

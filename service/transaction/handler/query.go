@@ -7,11 +7,11 @@ import (
 
 	pbhelpers "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/service/transaction/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	transaction_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/transaction_errors/grpc"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/service/transaction/service"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type transactionQueryHandleGrpc struct {
@@ -26,6 +26,12 @@ func NewTransactionQueryHandleGrpc(service service.TransactionQueryService) Tran
 	}
 }
 
+func formatTxTime(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format(time.RFC3339)
+}
 
 func (t *transactionQueryHandleGrpc) FindAllTransaction(ctx context.Context, request *pb.FindAllTransactionRequest) (*pb.ApiResponsePaginationTransaction, error) {
 	page := int(request.GetPage())
@@ -71,8 +77,8 @@ func (t *transactionQueryHandleGrpc) FindAllTransaction(ctx context.Context, req
 			PaymentMethod:   tx.PaymentMethod,
 			MerchantId:      tx.MerchantID,
 			TransactionTime: tx.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(tx.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(tx.UpdatedAt),
+			CreatedAt:       formatTxTime(tx.CreatedAt),
+			UpdatedAt:       formatTxTime(tx.UpdatedAt),
 		}
 	}
 
@@ -129,8 +135,8 @@ func (t *transactionQueryHandleGrpc) FindAllTransactionByCardNumber(ctx context.
 			PaymentMethod:   tx.PaymentMethod,
 			MerchantId:      tx.MerchantID,
 			TransactionTime: tx.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(tx.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(tx.UpdatedAt),
+			CreatedAt:       formatTxTime(tx.CreatedAt),
+			UpdatedAt:       formatTxTime(tx.UpdatedAt),
 		}
 	}
 
@@ -166,8 +172,8 @@ func (t *transactionQueryHandleGrpc) FindByIdTransaction(ctx context.Context, re
 			PaymentMethod:   transaction.PaymentMethod,
 			MerchantId:      transaction.MerchantID,
 			TransactionTime: transaction.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(transaction.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(transaction.UpdatedAt),
+			CreatedAt:       formatTxTime(transaction.CreatedAt),
+			UpdatedAt:       formatTxTime(transaction.UpdatedAt),
 		},
 	}, nil
 }
@@ -195,8 +201,8 @@ func (t *transactionQueryHandleGrpc) FindTransactionByMerchantId(ctx context.Con
 			PaymentMethod:   transaction.PaymentMethod,
 			MerchantId:      transaction.MerchantID,
 			TransactionTime: transaction.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(transaction.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(transaction.UpdatedAt),
+			CreatedAt:       formatTxTime(transaction.CreatedAt),
+			UpdatedAt:       formatTxTime(transaction.UpdatedAt),
 		}
 	}
 
@@ -251,9 +257,9 @@ func (t *transactionQueryHandleGrpc) FindByActiveTransaction(ctx context.Context
 			PaymentMethod:   tx.PaymentMethod,
 			MerchantId:      tx.MerchantID,
 			TransactionTime: tx.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(tx.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(tx.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(tx.DeletedAt),
+			CreatedAt:       formatTxTime(tx.CreatedAt),
+			UpdatedAt:       formatTxTime(tx.UpdatedAt),
+			DeletedAt:       &wrapperspb.StringValue{Value: formatTxTime(tx.DeletedAt)},
 		}
 	}
 
@@ -309,9 +315,9 @@ func (t *transactionQueryHandleGrpc) FindByTrashedTransaction(ctx context.Contex
 			PaymentMethod:   tx.PaymentMethod,
 			MerchantId:      tx.MerchantID,
 			TransactionTime: tx.TransactionTime.Format(time.RFC3339),
-			CreatedAt:       convert.FormatTimeRFC3339(tx.CreatedAt),
-			UpdatedAt:       convert.FormatTimeRFC3339(tx.UpdatedAt),
-			DeletedAt:       convert.TimeToWrappers(tx.DeletedAt),
+			CreatedAt:       formatTxTime(tx.CreatedAt),
+			UpdatedAt:       formatTxTime(tx.UpdatedAt),
+			DeletedAt:       &wrapperspb.StringValue{Value: formatTxTime(tx.DeletedAt)},
 		}
 	}
 

@@ -10,10 +10,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	mycontext "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/context"
 	graph "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/handler"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/middlewares"
 	mencache "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/redis"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
-	sharedcachehelpers "github.com/MamangRust/microservice-payment-gateway-grpc/shared/cache"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/observability"
 	"github.com/redis/go-redis/v9"
 	"github.com/vektah/gqlparser/v2/ast"
 	"google.golang.org/grpc"
@@ -34,7 +33,17 @@ func CreateDummyConn() *grpc.ClientConn {
 
 // NewResolver creates a Resolver with the provided service connections.
 func NewResolver(conns *ServiceConnections, log logger.LoggerInterface) *graph.Resolver {
-	return NewResolverWithRedis(conns, log, nil)
+	myMencache := mencache.NewCacheApiGateway(&mencache.Deps{
+		Redis:  nil,
+		Logger: log,
+	})
+
+	return graph.NewResolver(&graph.Deps{
+		Clients:  conns,
+		Logger:   log,
+		Kafka:    nil,
+		Mencache: myMencache,
+	})
 }
 
 // NewResolverWithRedis creates a Resolver with the provided service connections and Redis client.
@@ -52,10 +61,30 @@ func NewResolverWithRedis(conns *ServiceConnections, log logger.LoggerInterface,
 	})
 }
 
+// permissiveRoleChecker stands in for the RBAC checker of the running gateway.
+//
+// The harness mounts the schema without AuthMiddleware, and that middleware is
+// what puts the authenticated user in the request context, so there is no user
+// for the @hasRole directive to authorise and it passes every field through.
+// The checker is wired anyway so the directive is never left nil, and so that a
+// test which injects a user (see WithUser) gets a predictable answer instead of
+// an "rbac: role checker is not configured" error.
+type permissiveRoleChecker struct{}
+
+func (permissiveRoleChecker) CheckRole(context.Context, int, ...string) error { return nil }
+
 // NewGraphQLHTTPHandler creates an http.Handler from a gqlgen Resolver.
 func NewGraphQLHTTPHandler(resolver *graph.Resolver) http.Handler {
+	return NewGraphQLHTTPHandlerWithRoleChecker(resolver, permissiveRoleChecker{})
+}
+
+// NewGraphQLHTTPHandlerWithRoleChecker builds the handler with an explicit RBAC
+// checker, so a test can exercise the @hasRole directive (pair it with WithUser
+// to simulate an authenticated caller).
+func NewGraphQLHTTPHandlerWithRoleChecker(resolver *graph.Resolver, checker middlewares.RoleChecker) http.Handler {
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
-		Resolvers: resolver,
+		Resolvers:  resolver,
+		Directives: graph.DirectiveRoot{HasRole: middlewares.HasRole(checker)},
 	}))
 
 	srv.AddTransport(transport.POST{})
@@ -65,37 +94,24 @@ func NewGraphQLHTTPHandler(resolver *graph.Resolver) http.Handler {
 	return srv
 }
 
-func newTestCaches(redisClient redis.UniversalClient, log logger.LoggerInterface) (mencache.MerchantCache, mencache.RoleCache) {
-	metrics, _ := observability.NewCacheMetrics("test")
-	store := sharedcachehelpers.NewCacheStore(redisClient, log, metrics)
-
-	return mencache.NewMerchantCache(store), mencache.NewRoleCache(store)
-}
-
-// NewDynamicUserIDContextMiddleware mimics the production JWT auth middleware
-// by injecting a user ID into the request context before each request. The ID
-// is resolved lazily so tests can register/login first and set it afterwards.
-func NewDynamicUserIDContextMiddleware(getUserID func() int, next http.Handler) http.Handler {
+// WithUser injects the given user id into the request context, emulating what
+// AuthMiddleware does for authenticated traffic.
+func WithUser(next http.Handler, userID int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if id := getUserID(); id != 0 {
-			r = r.WithContext(mycontext.WithUserID(r.Context(), id))
-		}
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(mycontext.WithUserID(r.Context(), userID)))
 	})
 }
 
-// SeedMerchantCache writes an apiKey -> merchantID mapping into the apigateway
-// merchant permission cache so ValidateMerchant can succeed without Kafka.
-func SeedMerchantCache(redisClient redis.UniversalClient, log logger.LoggerInterface, apiKey string, merchantID string) error {
-	merchantCache, _ := newTestCaches(redisClient, log)
-	merchantCache.SetMerchantCache(context.Background(), merchantID, apiKey)
-	return nil
+// SeedMerchantCache writes a merchant ID-to-API-key mapping into Redis
+// so the permission validation can find it without Kafka.
+func SeedMerchantCache(redisClient *redis.Client, merchantID string, apiKey string) error {
+	key := "merchant_api_key:" + merchantID
+	return redisClient.Set(context.Background(), key, apiKey, 0).Err()
 }
 
-// SeedRoleCache writes a userID -> roles mapping into the apigateway role
-// permission cache so ValidateRole can succeed without Kafka.
-func SeedRoleCache(redisClient redis.UniversalClient, log logger.LoggerInterface, userID string, roles []string) error {
-	_, roleCache := newTestCaches(redisClient, log)
-	roleCache.SetRoleCache(context.Background(), userID, roles)
-	return nil
+// SeedRoleCache writes a user role mapping into Redis
+// so the permission validation can find it without Kafka.
+func SeedRoleCache(redisClient *redis.Client, userID string, roles []string) error {
+	key := "user_roles:" + userID
+	return redisClient.Set(context.Background(), key, roles, 0).Err()
 }

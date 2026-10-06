@@ -8,10 +8,10 @@ import (
 	pbhelper "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/withdraw/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	withdraw_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/withdraw_errors/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type withdrawQueryHandleGrpc struct {
@@ -64,14 +64,22 @@ func (w *withdrawQueryHandleGrpc) FindAllWithdraw(ctx context.Context, req *pb.F
 	withdrawResponses := make([]*pb.WithdrawResponse, len(withdraws))
 	for i, t := range withdraws {
 		withdraw := t.Withdraw
+		createdAt := ""
+		updatedAt := ""
+		if withdraw.CreatedAt != nil {
+			createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+		}
+		if withdraw.UpdatedAt != nil {
+			updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+		}
 		withdrawResponses[i] = &pb.WithdrawResponse{
 			WithdrawId:     int32(withdraw.WithdrawID),
 			WithdrawNo:     withdraw.WithdrawNo,
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		}
 	}
 
@@ -121,14 +129,22 @@ func (w *withdrawQueryHandleGrpc) FindAllWithdrawByCardNumber(ctx context.Contex
 	withdrawResponses := make([]*pb.WithdrawResponse, len(withdraws))
 	for i, t := range withdraws {
 		withdraw := t.Withdraw
+		createdAt := ""
+		updatedAt := ""
+		if withdraw.CreatedAt != nil {
+			createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+		}
+		if withdraw.UpdatedAt != nil {
+			updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+		}
 		withdrawResponses[i] = &pb.WithdrawResponse{
 			WithdrawId:     int32(withdraw.WithdrawID),
 			WithdrawNo:     withdraw.WithdrawNo,
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		}
 	}
 
@@ -153,6 +169,15 @@ func (w *withdrawQueryHandleGrpc) FindByIdWithdraw(ctx context.Context, req *pb.
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	if withdraw.CreatedAt != nil {
+		createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+	}
+	if withdraw.UpdatedAt != nil {
+		updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return &pb.ApiResponseWithdraw{
 		Status:  "success",
 		Message: "Successfully fetched withdraw",
@@ -162,8 +187,8 @@ func (w *withdrawQueryHandleGrpc) FindByIdWithdraw(ctx context.Context, req *pb.
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		},
 	}, nil
 }
@@ -204,15 +229,27 @@ func (w *withdrawQueryHandleGrpc) FindByActive(ctx context.Context, req *pb.Find
 	withdrawResponses := make([]*pb.WithdrawResponseDeleteAt, len(withdraws))
 	for i, t := range withdraws {
 		withdraw := t.Withdraw
+		createdAt := ""
+		updatedAt := ""
+		deletedAt := &wrapperspb.StringValue{}
+		if withdraw.CreatedAt != nil {
+			createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+		}
+		if withdraw.UpdatedAt != nil {
+			updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+		}
+		if withdraw.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: withdraw.DeletedAt.Format(time.RFC3339)}
+		}
 		withdrawResponses[i] = &pb.WithdrawResponseDeleteAt{
 			WithdrawId:     int32(withdraw.WithdrawID),
 			WithdrawNo:     withdraw.WithdrawNo,
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(withdraw.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		}
 	}
 
@@ -260,15 +297,27 @@ func (w *withdrawQueryHandleGrpc) FindByTrashed(ctx context.Context, req *pb.Fin
 	withdrawResponses := make([]*pb.WithdrawResponseDeleteAt, len(withdraws))
 	for i, t := range withdraws {
 		withdraw := t.Withdraw
+		createdAt := ""
+		updatedAt := ""
+		deletedAt := &wrapperspb.StringValue{}
+		if withdraw.CreatedAt != nil {
+			createdAt = withdraw.CreatedAt.Format(time.RFC3339)
+		}
+		if withdraw.UpdatedAt != nil {
+			updatedAt = withdraw.UpdatedAt.Format(time.RFC3339)
+		}
+		if withdraw.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: withdraw.DeletedAt.Format(time.RFC3339)}
+		}
 		withdrawResponses[i] = &pb.WithdrawResponseDeleteAt{
 			WithdrawId:     int32(withdraw.WithdrawID),
 			WithdrawNo:     withdraw.WithdrawNo,
 			CardNumber:     withdraw.CardNumber,
 			WithdrawAmount: int64(withdraw.WithdrawAmount),
 			WithdrawTime:   withdraw.WithdrawTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(withdraw.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(withdraw.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(withdraw.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		}
 	}
 

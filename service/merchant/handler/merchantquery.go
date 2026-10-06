@@ -3,14 +3,16 @@ package handler
 import (
 	"context"
 	"math"
+	"time"
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/service"
 	pbutils "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	merchant_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/merchant_errors/grpc"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type merchantQueryHandleGrpc struct {
@@ -181,7 +183,11 @@ func (s *merchantQueryHandleGrpc) FindByActive(ctx context.Context, req *pb.Find
 
 	protoMerchants := make([]*pb.MerchantResponseDeleteAt, len(res))
 	for i, merchant := range res {
-			protoMerchants[i] = &pb.MerchantResponseDeleteAt{
+		var deletedAt *wrapperspb.StringValue
+		if merchant.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: merchant.DeletedAt.Format(time.RFC3339)}
+		}
+		protoMerchants[i] = &pb.MerchantResponseDeleteAt{
 			Id:        int32(merchant.MerchantID),
 			Name:      merchant.Name,
 			ApiKey:    merchant.ApiKey,
@@ -189,7 +195,7 @@ func (s *merchantQueryHandleGrpc) FindByActive(ctx context.Context, req *pb.Find
 			UserId:    int32(merchant.UserID),
 			CreatedAt: convert.FormatTimeRFC3339(merchant.CreatedAt),
 			UpdatedAt: convert.FormatTimeRFC3339(merchant.UpdatedAt),
-			DeletedAt: convert.TimeToWrappers(merchant.DeletedAt),
+			DeletedAt: deletedAt,
 		}
 	}
 
@@ -230,7 +236,11 @@ func (s *merchantQueryHandleGrpc) FindByTrashed(ctx context.Context, req *pb.Fin
 
 	protoMerchants := make([]*pb.MerchantResponseDeleteAt, len(res))
 	for i, merchant := range res {
-			protoMerchants[i] = &pb.MerchantResponseDeleteAt{
+		var deletedAt *wrapperspb.StringValue
+		if merchant.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: merchant.DeletedAt.Format(time.RFC3339)}
+		}
+		protoMerchants[i] = &pb.MerchantResponseDeleteAt{
 			Id:        int32(merchant.MerchantID),
 			Name:      merchant.Name,
 			ApiKey:    merchant.ApiKey,
@@ -238,7 +248,7 @@ func (s *merchantQueryHandleGrpc) FindByTrashed(ctx context.Context, req *pb.Fin
 			UserId:    int32(merchant.UserID),
 			CreatedAt: convert.FormatTimeRFC3339(merchant.CreatedAt),
 			UpdatedAt: convert.FormatTimeRFC3339(merchant.UpdatedAt),
-			DeletedAt: convert.TimeToWrappers(merchant.DeletedAt),
+			DeletedAt: deletedAt,
 		}
 	}
 

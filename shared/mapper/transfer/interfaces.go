@@ -2,7 +2,7 @@ package transferapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -38,22 +38,22 @@ type TransferCommandResponseMapper interface {
 
 type TransferStatsStatusResponseMapper interface {
 	// Converts monthly successful transfer statistics into an API response.
-	ToApiResponseTransferMonthStatusSuccess(pbResponse *statspb.ApiResponseTransferMonthStatusSuccess) *response.ApiResponseTransferMonthStatusSuccess
+	ToApiResponseTransferMonthStatusSuccess(pbResponse *pbstats.ApiResponseTransferMonthStatusSuccess) *response.ApiResponseTransferMonthStatusSuccess
 
 	// Converts yearly successful transfer statistics into an API response.
-	ToApiResponseTransferYearStatusSuccess(pbResponse *statspb.ApiResponseTransferYearStatusSuccess) *response.ApiResponseTransferYearStatusSuccess
+	ToApiResponseTransferYearStatusSuccess(pbResponse *pbstats.ApiResponseTransferYearStatusSuccess) *response.ApiResponseTransferYearStatusSuccess
 
 	// Converts monthly failed transfer statistics into an API response.
-	ToApiResponseTransferMonthStatusFailed(pbResponse *statspb.ApiResponseTransferMonthStatusFailed) *response.ApiResponseTransferMonthStatusFailed
+	ToApiResponseTransferMonthStatusFailed(pbResponse *pbstats.ApiResponseTransferMonthStatusFailed) *response.ApiResponseTransferMonthStatusFailed
 
 	// Converts yearly failed transfer statistics into an API response.
-	ToApiResponseTransferYearStatusFailed(pbResponse *statspb.ApiResponseTransferYearStatusFailed) *response.ApiResponseTransferYearStatusFailed
+	ToApiResponseTransferYearStatusFailed(pbResponse *pbstats.ApiResponseTransferYearStatusFailed) *response.ApiResponseTransferYearStatusFailed
 }
 
 type TransferStatsAmountResponseMapper interface {
 	// Converts monthly total transfer amount statistics into an API response.
-	ToApiResponseTransferMonthAmount(pbResponse *statspb.ApiResponseTransferMonthAmount) *response.ApiResponseTransferMonthAmount
+	ToApiResponseTransferMonthAmount(pbResponse *pbstats.ApiResponseTransferMonthAmount) *response.ApiResponseTransferMonthAmount
 
 	// Converts yearly total transfer amount statistics into an API response.
-	ToApiResponseTransferYearAmount(pbResponse *statspb.ApiResponseTransferYearAmount) *response.ApiResponseTransferYearAmount
+	ToApiResponseTransferYearAmount(pbResponse *pbstats.ApiResponseTransferYearAmount) *response.ApiResponseTransferYearAmount
 }

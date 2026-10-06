@@ -33,16 +33,22 @@ import (
 	withdraw_cache "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/redis/api/withdraw"
 	authpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb"
 	cardpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	cardstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card/stats"
 	merchantpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
+	merchantstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant/stats"
 	merchantdocumentpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant_document"
 	rolepb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/role"
 	saldopb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
+	saldostatspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
 	topuppb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup"
+	topupstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup/stats"
 	transactionpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction"
+	transactionstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction/stats"
 	transferpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
+	transferstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer/stats"
 	userpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/user"
 	withdrawpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
+	withdrawstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/kafka"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
@@ -69,7 +75,6 @@ type Resolver struct {
 	TransferGraphql         TransferHandleGraphql
 	WithdrawGraphql         WithdrawHandleGraphql
 	ResolverHandle          *resolverHandler
-	StatsRead               StatsReadHandleGraphql
 }
 
 type UserClient struct {
@@ -86,11 +91,11 @@ type CardClient struct {
 	CardQueryClient                  cardpb.CardQueryServiceClient
 	CardCommandClient                cardpb.CardCommandServiceClient
 	CardDashboardClient              cardpb.CardDashboardServiceClient
-	CardStatsBalanceClient           statspb.CardStatsBalanceServiceClient
-	CardStatsTopupAmountClient       statspb.CardStatsTopupServiceClient
-	CardStatsTransactionAmountClient statspb.CardStatsTransactionServiceClient
-	CardStatsWithdrawAmountClient    statspb.CardStatsWithdrawServiceClient
-	CardStatsTransferAmountClient    statspb.
+	CardStatsBalanceClient           cardstatpb.CardStatsBalanceServiceClient
+	CardStatsTopupAmountClient       cardstatpb.CardStatsTopupServiceClient
+	CardStatsTransactionAmountClient cardstatpb.CardStatsTransactionServiceClient
+	CardStatsWithdrawAmountClient    cardstatpb.CardStatsWithdrawServiceClient
+	CardStatsTransferAmountClient    cardstatpb.
 						CardStatsTransferServiceClient
 }
 
@@ -98,9 +103,9 @@ type MerchantClient struct {
 	MerchantQuery            merchantpb.MerchantQueryServiceClient
 	MerchantCommand          merchantpb.MerchantCommandServiceClient
 	MerchantTransaction      merchantpb.MerchantTransactionServiceClient
-	MerchantStatsAmount      statspb.MerchantStatsAmountServiceClient
-	MerchantStatsTotalAmount statspb.MerchantStatsTotalAmountServiceClient
-	MerchantStatsMethod      statspb.MerchantStatsMethodServiceClient
+	MerchantStatsAmount      merchantstatpb.MerchantStatsAmountServiceClient
+	MerchantStatsTotalAmount merchantstatpb.MerchantStatsTotalAmountServiceClient
+	MerchantStatsMethod      merchantstatpb.MerchantStatsMethodServiceClient
 }
 
 type MerchantDocumentClient struct {
@@ -111,37 +116,37 @@ type MerchantDocumentClient struct {
 type SaldoClient struct {
 	SaldoQueryClient             saldopb.SaldoQueryServiceClient
 	SaldoCommandClient           saldopb.SaldoCommandServiceClient
-	SaldoStatsBalanceClient      statspb.SaldoStatsBalanceServiceClient
-	SaldoStatsTotalBalanceClient statspb.SaldoStatsTotalBalanceClient
+	SaldoStatsBalanceClient      saldostatspb.SaldoStatsBalanceServiceClient
+	SaldoStatsTotalBalanceClient saldostatspb.SaldoStatsTotalBalanceClient
 }
 
 type TopupClient struct {
 	TopupQueryClient   topuppb.TopupQueryServiceClient
 	TopupCommandClient topuppb.TopupCommandServiceClient
-	TopupStatsAmount   statspb.TopupStatsAmountServiceClient
-	TopupStatsMethod   statspb.TopupStatsMethodServiceClient
-	TopupStatsStatus   statspb.TopupStatsStatusServiceClient
+	TopupStatsAmount   topupstatpb.TopupStatsAmountServiceClient
+	TopupStatsMethod   topupstatpb.TopupStatsMethodServiceClient
+	TopupStatsStatus   topupstatpb.TopupStatsStatusServiceClient
 }
 
 type TransactionClient struct {
 	TransactionQueryClient   transactionpb.TransactionQueryServiceClient
 	TransactionCommandClient transactionpb.TransactionCommandServiceClient
-	TransactionStatsAmount   statspb.TransactionStatsAmountServiceClient
-	TransactionStatsMethod   statspb.TransactionStatsMethodServiceClient
-	TransactionStatsStatus   statspb.TransactionStatsStatusServiceClient
+	TransactionStatsAmount   transactionstatpb.TransactionStatsAmountServiceClient
+	TransactionStatsMethod   transactionstatpb.TransactionStatsMethodServiceClient
+	TransactionStatsStatus   transactionstatpb.TransactionStatsStatusServiceClient
 }
 
 type TransferClient struct {
 	TransferQueryClient   transferpb.TransferQueryServiceClient
 	TransferCommandClient transferpb.TransferCommandServiceClient
-	TransferStatsAmount   statspb.TransferStatsAmountServiceClient
-	TransferStatsStatus   statspb.TransferStatsStatusServiceClient
+	TransferStatsAmount   transferstatpb.TransferStatsAmountServiceClient
+	TransferStatsStatus   transferstatpb.TransferStatsStatusServiceClient
 }
 type WithdrawClient struct {
 	WithdrawQueryClient   withdrawpb.WithdrawQueryServiceClient
 	WithdrawCommandClient withdrawpb.WithdrawCommandServiceClient
-	WithdrawStatsAmount   statspb.WithdrawStatsAmountServiceClient
-	WithdrawStatsStatus   statspb.WithdrawStatsStatusServiceClient
+	WithdrawStatsAmount   withdrawstatpb.WithdrawStatsAmountServiceClient
+	WithdrawStatsStatus   withdrawstatpb.WithdrawStatsStatusServiceClient
 }
 
 type AuthHandleGraphql struct {
@@ -240,31 +245,6 @@ type ServiceConnections struct {
 	StatsReaderClient *grpc.ClientConn
 }
 
-type StatsReadHandleGraphql struct {
-	CardStatsBalance            statspb.CardStatsBalanceServiceClient
-	CardStatsTopup              statspb.CardStatsTopupServiceClient
-	CardStatsTransaction        statspb.CardStatsTransactionServiceClient
-	CardStatsTransfer           statspb.CardStatsTransferServiceClient
-	CardStatsWithdraw           statspb.CardStatsWithdrawServiceClient
-	CardDashboard               cardpb.CardDashboardServiceClient
-	TopupStatsAmount            statspb.TopupStatsAmountServiceClient
-	TopupStatsMethod            statspb.TopupStatsMethodServiceClient
-	TopupStatsStatus            statspb.TopupStatsStatusServiceClient
-	WithdrawStatsAmount         statspb.WithdrawStatsAmountServiceClient
-	WithdrawStatsStatus         statspb.WithdrawStatsStatusServiceClient
-	TransactionStatsAmount      statspb.TransactionStatsAmountServiceClient
-	TransactionStatsMethod      statspb.TransactionStatsMethodServiceClient
-	TransactionStatsStatus      statspb.TransactionStatsStatusServiceClient
-	TransferStatsAmount         statspb.TransferStatsAmountServiceClient
-	TransferStatsStatus         statspb.TransferStatsStatusServiceClient
-	MerchantStatsAmount         statspb.MerchantStatsAmountServiceClient
-	MerchantStatsMethod         statspb.MerchantStatsMethodServiceClient
-	MerchantStatsTotalAmount    statspb.MerchantStatsTotalAmountServiceClient
-	MerchantTransaction         merchantpb.MerchantTransactionServiceClient
-	SaldoStatsBalance           statspb.SaldoStatsBalanceServiceClient
-	SaldoStatsTotal             statspb.SaldoStatsTotalBalanceClient
-}
-
 type Deps struct {
 	Clients  *ServiceConnections
 	Logger   logger.LoggerInterface
@@ -295,7 +275,7 @@ func NewResolver(
 	cacheCard := card_cache.NewCardMencache(store)
 	cacheMerchantDocument := merchant_document_cache.NewMerchantDocumentMencache(store)
 
-	result := &Resolver{
+	return &Resolver{
 		ResolverHandle: resolverHandle,
 		AuthGraphql: AuthHandleGraphql{
 			AuthClient: authpb.NewAuthServiceClient(deps.Clients.AuthClient),
@@ -328,11 +308,11 @@ func NewResolver(
 				CardQueryClient:                  cardpb.NewCardQueryServiceClient(deps.Clients.CardClient),
 				CardCommandClient:                cardpb.NewCardCommandServiceClient(deps.Clients.CardClient),
 				CardDashboardClient:              cardpb.NewCardDashboardServiceClient(deps.Clients.CardClient),
-				CardStatsBalanceClient:           statspb.NewCardStatsBalanceServiceClient(deps.Clients.CardClient),
-				CardStatsTopupAmountClient:       statspb.NewCardStatsTopupServiceClient(deps.Clients.CardClient),
-				CardStatsTransactionAmountClient: statspb.NewCardStatsTransactionServiceClient(deps.Clients.CardClient),
-				CardStatsWithdrawAmountClient:    statspb.NewCardStatsWithdrawServiceClient(deps.Clients.CardClient),
-				CardStatsTransferAmountClient:    statspb.NewCardStatsTransferServiceClient(deps.Clients.CardClient),
+				CardStatsBalanceClient:           cardstatpb.NewCardStatsBalanceServiceClient(deps.Clients.CardClient),
+				CardStatsTopupAmountClient:       cardstatpb.NewCardStatsTopupServiceClient(deps.Clients.CardClient),
+				CardStatsTransactionAmountClient: cardstatpb.NewCardStatsTransactionServiceClient(deps.Clients.CardClient),
+				CardStatsWithdrawAmountClient:    cardstatpb.NewCardStatsWithdrawServiceClient(deps.Clients.CardClient),
+				CardStatsTransferAmountClient:    cardstatpb.NewCardStatsTransferServiceClient(deps.Clients.CardClient),
 			},
 			Logger:  deps.Logger,
 			Mapping: cardgraphqlmapper.NewCardResponseMapper(),
@@ -343,9 +323,9 @@ func NewResolver(
 				MerchantQuery:            merchantpb.NewMerchantQueryServiceClient(deps.Clients.MerchantClient),
 				MerchantCommand:          merchantpb.NewMerchantCommandServiceClient(deps.Clients.MerchantClient),
 				MerchantTransaction:      merchantpb.NewMerchantTransactionServiceClient(deps.Clients.MerchantClient),
-				MerchantStatsAmount:      statspb.NewMerchantStatsAmountServiceClient(deps.Clients.MerchantClient),
-				MerchantStatsTotalAmount: statspb.NewMerchantStatsTotalAmountServiceClient(deps.Clients.MerchantClient),
-				MerchantStatsMethod:      statspb.NewMerchantStatsMethodServiceClient(deps.Clients.MerchantClient),
+				MerchantStatsAmount:      merchantstatpb.NewMerchantStatsAmountServiceClient(deps.Clients.MerchantClient),
+				MerchantStatsTotalAmount: merchantstatpb.NewMerchantStatsTotalAmountServiceClient(deps.Clients.MerchantClient),
+				MerchantStatsMethod:      merchantstatpb.NewMerchantStatsMethodServiceClient(deps.Clients.MerchantClient),
 			},
 			Logger:  deps.Logger,
 			Mapping: merchantgraphqlmapper.NewMerchantResponseMapper(),
@@ -364,8 +344,8 @@ func NewResolver(
 			SaldoClient: SaldoClient{
 				SaldoQueryClient:             saldopb.NewSaldoQueryServiceClient(deps.Clients.SaldoClient),
 				SaldoCommandClient:           saldopb.NewSaldoCommandServiceClient(deps.Clients.SaldoClient),
-				SaldoStatsBalanceClient:      statspb.NewSaldoStatsBalanceServiceClient(deps.Clients.SaldoClient),
-				SaldoStatsTotalBalanceClient: statspb.NewSaldoStatsTotalBalanceClient(deps.Clients.SaldoClient),
+				SaldoStatsBalanceClient:      saldostatspb.NewSaldoStatsBalanceServiceClient(deps.Clients.SaldoClient),
+				SaldoStatsTotalBalanceClient: saldostatspb.NewSaldoStatsTotalBalanceClient(deps.Clients.SaldoClient),
 			},
 			Logger:  deps.Logger,
 			Mapping: saldographqlmapper.NewSaldoGraphqlMapper(),
@@ -375,9 +355,9 @@ func NewResolver(
 			TopupClient: TopupClient{
 				TopupQueryClient:   topuppb.NewTopupQueryServiceClient(deps.Clients.TopupClient),
 				TopupCommandClient: topuppb.NewTopupCommandServiceClient(deps.Clients.TopupClient),
-				TopupStatsAmount:   statspb.NewTopupStatsAmountServiceClient(deps.Clients.TopupClient),
-				TopupStatsMethod:   statspb.NewTopupStatsMethodServiceClient(deps.Clients.TopupClient),
-				TopupStatsStatus:   statspb.NewTopupStatsStatusServiceClient(deps.Clients.TopupClient),
+				TopupStatsAmount:   topupstatpb.NewTopupStatsAmountServiceClient(deps.Clients.TopupClient),
+				TopupStatsMethod:   topupstatpb.NewTopupStatsMethodServiceClient(deps.Clients.TopupClient),
+				TopupStatsStatus:   topupstatpb.NewTopupStatsStatusServiceClient(deps.Clients.TopupClient),
 			},
 			Logger:  deps.Logger,
 			Mapping: topupgraphqlmapper.NewTopupGraphqlMapper(),
@@ -387,21 +367,21 @@ func NewResolver(
 			TransactionClient: TransactionClient{
 				TransactionQueryClient:   transactionpb.NewTransactionQueryServiceClient(deps.Clients.TransactionClient),
 				TransactionCommandClient: transactionpb.NewTransactionCommandServiceClient(deps.Clients.TransactionClient),
-				TransactionStatsAmount:   statspb.NewTransactionStatsAmountServiceClient(deps.Clients.TransactionClient),
-				TransactionStatsMethod:   statspb.NewTransactionStatsMethodServiceClient(deps.Clients.TransactionClient),
-				TransactionStatsStatus:   statspb.NewTransactionStatsStatusServiceClient(deps.Clients.TransactionClient),
+				TransactionStatsAmount:   transactionstatpb.NewTransactionStatsAmountServiceClient(deps.Clients.TransactionClient),
+				TransactionStatsMethod:   transactionstatpb.NewTransactionStatsMethodServiceClient(deps.Clients.TransactionClient),
+				TransactionStatsStatus:   transactionstatpb.NewTransactionStatsStatusServiceClient(deps.Clients.TransactionClient),
 			},
 			Logger:     deps.Logger,
 			Mapping:    transactiongraphqlmapper.NewTransactionGraphqlMapper(),
-			Permission: merchantpermission.NewMerchantPermission(deps.Kafka, "request-transaction", "response-transaction", 5*time.Second, deps.Logger, deps.Mencache),
+			Permission: merchantpermission.NewMerchantPermission(deps.Kafka, "request-transaction", "response-transaction", 5*time.Second, deps.Logger),
 			Cache:      cacheTransaction,
 		},
 		TransferGraphql: TransferHandleGraphql{
 			TransferClient: TransferClient{
 				TransferQueryClient:   transferpb.NewTransferQueryServiceClient(deps.Clients.TransferClient),
 				TransferCommandClient: transferpb.NewTransferCommandServiceClient(deps.Clients.TransferClient),
-				TransferStatsAmount:   statspb.NewTransferStatsAmountServiceClient(deps.Clients.TransferClient),
-				TransferStatsStatus:   statspb.NewTransferStatsStatusServiceClient(deps.Clients.TransferClient),
+				TransferStatsAmount:   transferstatpb.NewTransferStatsAmountServiceClient(deps.Clients.TransferClient),
+				TransferStatsStatus:   transferstatpb.NewTransferStatsStatusServiceClient(deps.Clients.TransferClient),
 			},
 			Logger:  deps.Logger,
 			Mapping: transfergraphqlmapper.NewTransferGraphqlMapper(),
@@ -411,42 +391,14 @@ func NewResolver(
 			WithdrawClient: WithdrawClient{
 				WithdrawQueryClient:   withdrawpb.NewWithdrawQueryServiceClient(deps.Clients.WithdrawClient),
 				WithdrawCommandClient: withdrawpb.NewWithdrawCommandServiceClient(deps.Clients.WithdrawClient),
-				WithdrawStatsAmount:   statspb.NewWithdrawStatsAmountServiceClient(deps.Clients.WithdrawClient),
-				WithdrawStatsStatus:   statspb.NewWithdrawStatsStatusServiceClient(deps.Clients.WithdrawClient),
+				WithdrawStatsAmount:   withdrawstatpb.NewWithdrawStatsAmountServiceClient(deps.Clients.WithdrawClient),
+				WithdrawStatsStatus:   withdrawstatpb.NewWithdrawStatsStatusServiceClient(deps.Clients.WithdrawClient),
 			},
 			Logger:  deps.Logger,
-			Mapping: withdrawgraphqlmapper.NewWithdrawGraphqlMapper(),			Cache:        cacheWithdraw,
+			Mapping: withdrawgraphqlmapper.NewWithdrawGraphqlMapper(),
+			Cache:   cacheWithdraw,
 		},
 	}
-
-	// Stats reader clients — all wired to the single StatsReaderClient conn.
-	sr := deps.Clients.StatsReaderClient
-	result.StatsRead = StatsReadHandleGraphql{
-		CardStatsBalance:            statspb.NewCardStatsBalanceServiceClient(sr),
-		CardStatsTopup:              statspb.NewCardStatsTopupServiceClient(sr),
-		CardStatsTransaction:        statspb.NewCardStatsTransactionServiceClient(sr),
-		CardStatsTransfer:           statspb.NewCardStatsTransferServiceClient(sr),
-		CardStatsWithdraw:           statspb.NewCardStatsWithdrawServiceClient(sr),
-		CardDashboard:               cardpb.NewCardDashboardServiceClient(sr),
-		TopupStatsAmount:            statspb.NewTopupStatsAmountServiceClient(sr),
-		TopupStatsMethod:            statspb.NewTopupStatsMethodServiceClient(sr),
-		TopupStatsStatus:            statspb.NewTopupStatsStatusServiceClient(sr),
-		WithdrawStatsAmount:         statspb.NewWithdrawStatsAmountServiceClient(sr),
-		WithdrawStatsStatus:         statspb.NewWithdrawStatsStatusServiceClient(sr),
-		TransactionStatsAmount:      statspb.NewTransactionStatsAmountServiceClient(sr),
-		TransactionStatsMethod:      statspb.NewTransactionStatsMethodServiceClient(sr),
-		TransactionStatsStatus:      statspb.NewTransactionStatsStatusServiceClient(sr),
-		TransferStatsAmount:         statspb.NewTransferStatsAmountServiceClient(sr),
-		TransferStatsStatus:         statspb.NewTransferStatsStatusServiceClient(sr),
-		MerchantStatsAmount:         statspb.NewMerchantStatsAmountServiceClient(sr),
-		MerchantStatsMethod:         statspb.NewMerchantStatsMethodServiceClient(sr),
-		MerchantStatsTotalAmount:    statspb.NewMerchantStatsTotalAmountServiceClient(sr),
-		MerchantTransaction:         merchantpb.NewMerchantTransactionServiceClient(sr),
-		SaldoStatsBalance:           statspb.NewSaldoStatsBalanceServiceClient(sr),
-		SaldoStatsTotal:             statspb.NewSaldoStatsTotalBalanceClient(sr),
-	}
-
-	return result
 }
 
 func (h *Resolver) handleGraphQLError(err error, operation string) *errors.AppError {

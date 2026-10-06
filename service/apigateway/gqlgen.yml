@@ -51,6 +51,11 @@ resolver:
   # resolver_template: [your/path/resolver.gotpl]
   # Optional: turn on to avoid rewriting existing resolver(s) when generating
   # preserve_resolver: false
+  # Resolver files are hand maintained (and carry explicit import aliases such
+  # as `errors ".../shared/errors"` that gqlgen does not preserve when it
+  # rewrites them), so generation must never touch existing resolver files.
+  # New fields have to be added by hand.
+  preserve_resolver: true
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json

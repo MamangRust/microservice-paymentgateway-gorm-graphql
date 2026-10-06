@@ -3,7 +3,8 @@ package handler
 import (
 	"context"
 
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
+	pbWithdrawStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/withdraw"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/stats-reader/repository"
 )
@@ -16,8 +17,8 @@ type WithdrawRepository interface {
 }
 
 type WithdrawStatsHandler struct {
-	statspb.UnimplementedWithdrawStatsAmountServiceServer
-	statspb.UnimplementedWithdrawStatsStatusServiceServer
+	pbWithdrawStats.UnimplementedWithdrawStatsAmountServiceServer
+	pbWithdrawStats.UnimplementedWithdrawStatsStatusServiceServer
 	repo WithdrawRepository
 	log  logger.LoggerInterface
 }
@@ -31,48 +32,48 @@ func NewWithdrawStatsHandler(repo WithdrawRepository, log logger.LoggerInterface
 
 // --- Withdraw Stats Amount Service ---
 
-func (h *WithdrawStatsHandler) FindMonthlyWithdraws(ctx context.Context, req *statspb.FindYearWithdrawStatus) (*statspb.ApiResponseWithdrawMonthAmount, error) {
+func (h *WithdrawStatsHandler) FindMonthlyWithdraws(ctx context.Context, req *withdraw.FindYearWithdrawStatus) (*pbWithdrawStats.ApiResponseWithdrawMonthAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "withdraw_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawMonthAmount{
+	return &pbWithdrawStats.ApiResponseWithdrawMonthAmount{
 		Status:  "success",
 		Message: "Retrieved monthly withdraw amounts",
 		Data:    h.mapToWithdrawMonthAmountData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindYearlyWithdraws(ctx context.Context, req *statspb.FindYearWithdrawStatus) (*statspb.ApiResponseWithdrawYearAmount, error) {
+func (h *WithdrawStatsHandler) FindYearlyWithdraws(ctx context.Context, req *withdraw.FindYearWithdrawStatus) (*pbWithdrawStats.ApiResponseWithdrawYearAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "withdraw_events", "", nil, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawYearAmount{
+	return &pbWithdrawStats.ApiResponseWithdrawYearAmount{
 		Status:  "success",
 		Message: "Retrieved yearly withdraw amounts",
 		Data:    h.mapToWithdrawYearAmountData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindMonthlyWithdrawsByCardNumber(ctx context.Context, req *statspb.FindYearWithdrawCardNumber) (*statspb.ApiResponseWithdrawMonthAmount, error) {
+func (h *WithdrawStatsHandler) FindMonthlyWithdrawsByCardNumber(ctx context.Context, req *withdraw.FindYearWithdrawCardNumber) (*pbWithdrawStats.ApiResponseWithdrawMonthAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "withdraw_events", "card_number", req.CardNumber, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawMonthAmount{
+	return &pbWithdrawStats.ApiResponseWithdrawMonthAmount{
 		Status:  "success",
 		Message: "Retrieved monthly withdraw amounts by card number",
 		Data:    h.mapToWithdrawMonthAmountData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindYearlyWithdrawsByCardNumber(ctx context.Context, req *statspb.FindYearWithdrawCardNumber) (*statspb.ApiResponseWithdrawYearAmount, error) {
+func (h *WithdrawStatsHandler) FindYearlyWithdrawsByCardNumber(ctx context.Context, req *withdraw.FindYearWithdrawCardNumber) (*pbWithdrawStats.ApiResponseWithdrawYearAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "withdraw_events", "card_number", req.CardNumber, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawYearAmount{
+	return &pbWithdrawStats.ApiResponseWithdrawYearAmount{
 		Status:  "success",
 		Message: "Retrieved yearly withdraw amounts by card number",
 		Data:    h.mapToWithdrawYearAmountData(data),
@@ -81,96 +82,96 @@ func (h *WithdrawStatsHandler) FindYearlyWithdrawsByCardNumber(ctx context.Conte
 
 // --- Withdraw Stats Status Service ---
 
-func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusSuccess(ctx context.Context, req *statspb.FindMonthlyWithdrawStatus) (*statspb.ApiResponseWithdrawMonthStatusSuccess, error) {
+func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusSuccess(ctx context.Context, req *withdraw.FindMonthlyWithdrawStatus) (*pbWithdrawStats.ApiResponseWithdrawMonthStatusSuccess, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "withdraw_events", "", nil, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawMonthStatusSuccess{
+	return &pbWithdrawStats.ApiResponseWithdrawMonthStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved monthly withdraw status success",
 		Data:    h.mapToWithdrawMonthStatusSuccessData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusSuccess(ctx context.Context, req *statspb.FindYearWithdrawStatus) (*statspb.ApiResponseWithdrawYearStatusSuccess, error) {
+func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusSuccess(ctx context.Context, req *withdraw.FindYearWithdrawStatus) (*pbWithdrawStats.ApiResponseWithdrawYearStatusSuccess, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "withdraw_events", "", nil, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawYearStatusSuccess{
+	return &pbWithdrawStats.ApiResponseWithdrawYearStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved yearly withdraw status success",
 		Data:    h.mapToWithdrawYearStatusSuccessData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusFailed(ctx context.Context, req *statspb.FindMonthlyWithdrawStatus) (*statspb.ApiResponseWithdrawMonthStatusFailed, error) {
+func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusFailed(ctx context.Context, req *withdraw.FindMonthlyWithdrawStatus) (*pbWithdrawStats.ApiResponseWithdrawMonthStatusFailed, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "withdraw_events", "", nil, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawMonthStatusFailed{
+	return &pbWithdrawStats.ApiResponseWithdrawMonthStatusFailed{
 		Status:  "success",
 		Message: "Retrieved monthly withdraw status failed",
 		Data:    h.mapToWithdrawMonthStatusFailedData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusFailed(ctx context.Context, req *statspb.FindYearWithdrawStatus) (*statspb.ApiResponseWithdrawYearStatusFailed, error) {
+func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusFailed(ctx context.Context, req *withdraw.FindYearWithdrawStatus) (*pbWithdrawStats.ApiResponseWithdrawYearStatusFailed, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "withdraw_events", "", nil, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawYearStatusFailed{
+	return &pbWithdrawStats.ApiResponseWithdrawYearStatusFailed{
 		Status:  "success",
 		Message: "Retrieved yearly withdraw status failed",
 		Data:    h.mapToWithdrawYearStatusFailedData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusSuccessCardNumber(ctx context.Context, req *statspb.FindMonthlyWithdrawStatusCardNumber) (*statspb.ApiResponseWithdrawMonthStatusSuccess, error) {
+func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusSuccessCardNumber(ctx context.Context, req *withdraw.FindMonthlyWithdrawStatusCardNumber) (*pbWithdrawStats.ApiResponseWithdrawMonthStatusSuccess, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "withdraw_events", "card_number", req.CardNumber, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawMonthStatusSuccess{
+	return &pbWithdrawStats.ApiResponseWithdrawMonthStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved monthly withdraw status success by card number",
 		Data:    h.mapToWithdrawMonthStatusSuccessData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusSuccessCardNumber(ctx context.Context, req *statspb.FindYearWithdrawStatusCardNumber) (*statspb.ApiResponseWithdrawYearStatusSuccess, error) {
+func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusSuccessCardNumber(ctx context.Context, req *withdraw.FindYearWithdrawStatusCardNumber) (*pbWithdrawStats.ApiResponseWithdrawYearStatusSuccess, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "withdraw_events", "card_number", req.CardNumber, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawYearStatusSuccess{
+	return &pbWithdrawStats.ApiResponseWithdrawYearStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved yearly withdraw status success by card number",
 		Data:    h.mapToWithdrawYearStatusSuccessData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusFailedCardNumber(ctx context.Context, req *statspb.FindMonthlyWithdrawStatusCardNumber) (*statspb.ApiResponseWithdrawMonthStatusFailed, error) {
+func (h *WithdrawStatsHandler) FindMonthlyWithdrawStatusFailedCardNumber(ctx context.Context, req *withdraw.FindMonthlyWithdrawStatusCardNumber) (*pbWithdrawStats.ApiResponseWithdrawMonthStatusFailed, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "withdraw_events", "card_number", req.CardNumber, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawMonthStatusFailed{
+	return &pbWithdrawStats.ApiResponseWithdrawMonthStatusFailed{
 		Status:  "success",
 		Message: "Retrieved monthly withdraw status failed by card number",
 		Data:    h.mapToWithdrawMonthStatusFailedData(data),
 	}, nil
 }
 
-func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusFailedCardNumber(ctx context.Context, req *statspb.FindYearWithdrawStatusCardNumber) (*statspb.ApiResponseWithdrawYearStatusFailed, error) {
+func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusFailedCardNumber(ctx context.Context, req *withdraw.FindYearWithdrawStatusCardNumber) (*pbWithdrawStats.ApiResponseWithdrawYearStatusFailed, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "withdraw_events", "card_number", req.CardNumber, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseWithdrawYearStatusFailed{
+	return &pbWithdrawStats.ApiResponseWithdrawYearStatusFailed{
 		Status:  "success",
 		Message: "Retrieved yearly withdraw status failed by card number",
 		Data:    h.mapToWithdrawYearStatusFailedData(data),
@@ -179,10 +180,10 @@ func (h *WithdrawStatsHandler) FindYearlyWithdrawStatusFailedCardNumber(ctx cont
 
 // --- Mappers ---
 
-func (h *WithdrawStatsHandler) mapToWithdrawMonthAmountData(data []repository.MonthlyAmount) []*statspb.WithdrawMonthlyAmountResponse {
-	var results []*statspb.WithdrawMonthlyAmountResponse
+func (h *WithdrawStatsHandler) mapToWithdrawMonthAmountData(data []repository.MonthlyAmount) []*pbWithdrawStats.WithdrawMonthlyAmountResponse {
+	var results []*pbWithdrawStats.WithdrawMonthlyAmountResponse
 	for _, d := range data {
-		results = append(results, &statspb.WithdrawMonthlyAmountResponse{
+		results = append(results, &pbWithdrawStats.WithdrawMonthlyAmountResponse{
 			Month:       d.Month,
 			TotalAmount: d.TotalAmount,
 		})
@@ -190,10 +191,10 @@ func (h *WithdrawStatsHandler) mapToWithdrawMonthAmountData(data []repository.Mo
 	return results
 }
 
-func (h *WithdrawStatsHandler) mapToWithdrawYearAmountData(data []repository.YearlyAmount) []*statspb.WithdrawYearlyAmountResponse {
-	var results []*statspb.WithdrawYearlyAmountResponse
+func (h *WithdrawStatsHandler) mapToWithdrawYearAmountData(data []repository.YearlyAmount) []*pbWithdrawStats.WithdrawYearlyAmountResponse {
+	var results []*pbWithdrawStats.WithdrawYearlyAmountResponse
 	for _, d := range data {
-		results = append(results, &statspb.WithdrawYearlyAmountResponse{
+		results = append(results, &pbWithdrawStats.WithdrawYearlyAmountResponse{
 			Year:        d.Year,
 			TotalAmount: d.TotalAmount,
 		})
@@ -201,10 +202,10 @@ func (h *WithdrawStatsHandler) mapToWithdrawYearAmountData(data []repository.Yea
 	return results
 }
 
-func (h *WithdrawStatsHandler) mapToWithdrawMonthStatusSuccessData(data []repository.MonthlyStatusStats) []*statspb.WithdrawMonthStatusSuccessResponse {
-	var results []*statspb.WithdrawMonthStatusSuccessResponse
+func (h *WithdrawStatsHandler) mapToWithdrawMonthStatusSuccessData(data []repository.MonthlyStatusStats) []*pbWithdrawStats.WithdrawMonthStatusSuccessResponse {
+	var results []*pbWithdrawStats.WithdrawMonthStatusSuccessResponse
 	for _, d := range data {
-		results = append(results, &statspb.WithdrawMonthStatusSuccessResponse{
+		results = append(results, &pbWithdrawStats.WithdrawMonthStatusSuccessResponse{
 			Year:         d.Year,
 			Month:        d.Month,
 			TotalSuccess: int32(d.TotalTransactions),
@@ -214,10 +215,10 @@ func (h *WithdrawStatsHandler) mapToWithdrawMonthStatusSuccessData(data []reposi
 	return results
 }
 
-func (h *WithdrawStatsHandler) mapToWithdrawYearStatusSuccessData(data []repository.YearlyStatusStats) []*statspb.WithdrawYearStatusSuccessResponse {
-	var results []*statspb.WithdrawYearStatusSuccessResponse
+func (h *WithdrawStatsHandler) mapToWithdrawYearStatusSuccessData(data []repository.YearlyStatusStats) []*pbWithdrawStats.WithdrawYearStatusSuccessResponse {
+	var results []*pbWithdrawStats.WithdrawYearStatusSuccessResponse
 	for _, d := range data {
-		results = append(results, &statspb.WithdrawYearStatusSuccessResponse{
+		results = append(results, &pbWithdrawStats.WithdrawYearStatusSuccessResponse{
 			Year:         d.Year,
 			TotalSuccess: int32(d.TotalTransactions),
 			TotalAmount:  d.TotalAmount,
@@ -226,10 +227,10 @@ func (h *WithdrawStatsHandler) mapToWithdrawYearStatusSuccessData(data []reposit
 	return results
 }
 
-func (h *WithdrawStatsHandler) mapToWithdrawMonthStatusFailedData(data []repository.MonthlyStatusStats) []*statspb.WithdrawMonthStatusFailedResponse {
-	var results []*statspb.WithdrawMonthStatusFailedResponse
+func (h *WithdrawStatsHandler) mapToWithdrawMonthStatusFailedData(data []repository.MonthlyStatusStats) []*pbWithdrawStats.WithdrawMonthStatusFailedResponse {
+	var results []*pbWithdrawStats.WithdrawMonthStatusFailedResponse
 	for _, d := range data {
-		results = append(results, &statspb.WithdrawMonthStatusFailedResponse{
+		results = append(results, &pbWithdrawStats.WithdrawMonthStatusFailedResponse{
 			Year:        d.Year,
 			Month:       d.Month,
 			TotalFailed: int32(d.TotalTransactions),
@@ -239,10 +240,10 @@ func (h *WithdrawStatsHandler) mapToWithdrawMonthStatusFailedData(data []reposit
 	return results
 }
 
-func (h *WithdrawStatsHandler) mapToWithdrawYearStatusFailedData(data []repository.YearlyStatusStats) []*statspb.WithdrawYearStatusFailedResponse {
-	var results []*statspb.WithdrawYearStatusFailedResponse
+func (h *WithdrawStatsHandler) mapToWithdrawYearStatusFailedData(data []repository.YearlyStatusStats) []*pbWithdrawStats.WithdrawYearStatusFailedResponse {
+	var results []*pbWithdrawStats.WithdrawYearStatusFailedResponse
 	for _, d := range data {
-		results = append(results, &statspb.WithdrawYearStatusFailedResponse{
+		results = append(results, &pbWithdrawStats.WithdrawYearStatusFailedResponse{
 			Year:        d.Year,
 			TotalFailed: int32(d.TotalTransactions),
 			TotalAmount: d.TotalAmount,

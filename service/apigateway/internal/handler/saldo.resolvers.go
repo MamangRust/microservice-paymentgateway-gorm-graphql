@@ -10,7 +10,6 @@ import (
 
 	pbcard "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/model"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -268,7 +267,7 @@ func (r *queryResolver) FindMonthlyTotalSaldoBalance(ctx context.Context, input 
 			return cachedData, nil
 		}
 
-		reqService := &statspb.FindMonthlySaldoTotalBalance{
+		reqService := &pb.FindMonthlySaldoTotalBalance{
 			Year:  year,
 			Month: month,
 		}
@@ -299,7 +298,7 @@ func (r *queryResolver) FindYearTotalSaldoBalance(ctx context.Context, input mod
 			return cachedData, nil
 		}
 
-		reqService := &statspb.FindYearlySaldo{
+		reqService := &pb.FindYearlySaldo{
 			Year: int32(year),
 		}
 
@@ -329,7 +328,7 @@ func (r *queryResolver) FindMonthlySaldoBalances(ctx context.Context, input mode
 			return cachedData, nil
 		}
 
-		reqService := &statspb.FindYearlySaldo{
+		reqService := &pb.FindYearlySaldo{
 			Year: int32(year),
 		}
 
@@ -359,7 +358,7 @@ func (r *queryResolver) FindYearlySaldoBalances(ctx context.Context, input model
 			return cachedData, nil
 		}
 
-		reqService := &statspb.FindYearlySaldo{
+		reqService := &pb.FindYearlySaldo{
 			Year: int32(year),
 		}
 

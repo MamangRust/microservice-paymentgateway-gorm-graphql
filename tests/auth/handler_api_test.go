@@ -106,7 +106,7 @@ func (s *AuthGraphqlHandlerTestSuite) SetupSuite() {
 	resolver := testhelper.NewResolverWithRedis(conns, s.ts.Logger, s.redisClient)
 	// getMe reads the user ID from the request context (set by the production
 	// JWT middleware), so mimic that with a dynamic context middleware.
-	s.graph = testhelper.NewDynamicUserIDContextMiddleware(func() int { return s.userID }, testhelper.NewGraphQLHTTPHandler(resolver))
+	s.graph = dynamicUserMiddleware(func() int { return s.userID }, testhelper.NewGraphQLHTTPHandler(resolver))
 
 	s.email = "auth.handler.graphql.test@example.com"
 	s.password = "password123"
@@ -282,4 +282,13 @@ func TestAuthGraphqlHandlerSuite(t *testing.T) {
 		t.Skip("skipping integration test")
 	}
 	suite.Run(t, new(AuthGraphqlHandlerTestSuite))
+}
+
+// dynamicUserMiddleware mimics the production AuthMiddleware: it resolves the
+// user id at request time (the suite registers the user mid-run) and injects
+// it into the request context the same way testhelper.WithUser does.
+func dynamicUserMiddleware(getUserID func() int, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		testhelper.WithUser(next, getUserID()).ServeHTTP(w, r)
+	})
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pbAISecurity "github.com/MamangRust/microservice-payment-gateway-grpc/pb/ai_security"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	saldo_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/repository"
@@ -326,7 +326,7 @@ func (s *TransferGapiTestSuite) Test8_TransferStats_Amount() {
 	s.Require().NoError(err)
 
 	s.T().Run("MonthlyAmount", func(t *testing.T) {
-		resp, err := s.statsClient.FindMonthlyTransferAmounts(ctx, &statspb.FindYearTransferStatus{Year: int32(now.Year())})
+		resp, err := s.statsClient.FindMonthlyTransferAmounts(ctx, &pb.FindYearTransferStatus{Year: int32(now.Year())})
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Equal("success", resp.Status)
@@ -334,7 +334,7 @@ func (s *TransferGapiTestSuite) Test8_TransferStats_Amount() {
 	})
 
 	s.T().Run("YearlyAmount", func(t *testing.T) {
-		resp, err := s.statsClient.FindYearlyTransferAmounts(ctx, &statspb.FindYearTransferStatus{Year: int32(now.Year())})
+		resp, err := s.statsClient.FindYearlyTransferAmounts(ctx, &pb.FindYearTransferStatus{Year: int32(now.Year())})
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Equal("success", resp.Status)
@@ -342,7 +342,7 @@ func (s *TransferGapiTestSuite) Test8_TransferStats_Amount() {
 	})
 
 	s.T().Run("MonthlyAmountBySender", func(t *testing.T) {
-		resp, err := s.statsClient.FindMonthlyTransferAmountsBySenderCardNumber(ctx, &statspb.FindByCardNumberTransferRequest{
+		resp, err := s.statsClient.FindMonthlyTransferAmountsBySenderCardNumber(ctx, &pb.FindByCardNumberTransferRequest{
 			Year: int32(now.Year()), CardNumber: s.senderCardNumber,
 		})
 		s.Require().NoError(err)
@@ -352,7 +352,7 @@ func (s *TransferGapiTestSuite) Test8_TransferStats_Amount() {
 	})
 
 	s.T().Run("MonthlyAmountByReceiver", func(t *testing.T) {
-		resp, err := s.statsClient.FindMonthlyTransferAmountsByReceiverCardNumber(ctx, &statspb.FindByCardNumberTransferRequest{
+		resp, err := s.statsClient.FindMonthlyTransferAmountsByReceiverCardNumber(ctx, &pb.FindByCardNumberTransferRequest{
 			Year: int32(now.Year()), CardNumber: s.senderCardNumber,
 		})
 		s.Require().NoError(err)
@@ -362,7 +362,7 @@ func (s *TransferGapiTestSuite) Test8_TransferStats_Amount() {
 	})
 
 	s.T().Run("YearlyAmountBySender", func(t *testing.T) {
-		resp, err := s.statsClient.FindYearlyTransferAmountsBySenderCardNumber(ctx, &statspb.FindByCardNumberTransferRequest{
+		resp, err := s.statsClient.FindYearlyTransferAmountsBySenderCardNumber(ctx, &pb.FindByCardNumberTransferRequest{
 			Year: int32(now.Year()), CardNumber: s.senderCardNumber,
 		})
 		s.Require().NoError(err)
@@ -372,7 +372,7 @@ func (s *TransferGapiTestSuite) Test8_TransferStats_Amount() {
 	})
 
 	s.T().Run("YearlyAmountByReceiver", func(t *testing.T) {
-		resp, err := s.statsClient.FindYearlyTransferAmountsByReceiverCardNumber(ctx, &statspb.FindByCardNumberTransferRequest{
+		resp, err := s.statsClient.FindYearlyTransferAmountsByReceiverCardNumber(ctx, &pb.FindByCardNumberTransferRequest{
 			Year: int32(now.Year()), CardNumber: s.senderCardNumber,
 		})
 		s.Require().NoError(err)
@@ -387,7 +387,7 @@ func (s *TransferGapiTestSuite) Test9_TransferStats_Status() {
 	now := time.Now()
 
 	s.T().Run("MonthlySuccess", func(t *testing.T) {
-		resp, err := s.statusClient.FindMonthlyTransferStatusSuccess(ctx, &statspb.FindMonthlyTransferStatus{
+		resp, err := s.statusClient.FindMonthlyTransferStatusSuccess(ctx, &pb.FindMonthlyTransferStatus{
 			Year: int32(now.Year()), Month: int32(now.Month()),
 		})
 		s.Require().NoError(err)
@@ -397,7 +397,7 @@ func (s *TransferGapiTestSuite) Test9_TransferStats_Status() {
 	})
 
 	s.T().Run("YearlyFailed", func(t *testing.T) {
-		resp, err := s.statusClient.FindYearlyTransferStatusFailed(ctx, &statspb.FindYearTransferStatus{Year: int32(now.Year())})
+		resp, err := s.statusClient.FindYearlyTransferStatusFailed(ctx, &pb.FindYearTransferStatus{Year: int32(now.Year())})
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Equal("success", resp.Status)
@@ -405,7 +405,7 @@ func (s *TransferGapiTestSuite) Test9_TransferStats_Status() {
 	})
 
 	s.T().Run("MonthlySuccessByCard", func(t *testing.T) {
-		resp, err := s.statusClient.FindMonthlyTransferStatusSuccessByCardNumber(ctx, &statspb.FindMonthlyTransferStatusCardNumber{
+		resp, err := s.statusClient.FindMonthlyTransferStatusSuccessByCardNumber(ctx, &pb.FindMonthlyTransferStatusCardNumber{
 			Year: int32(now.Year()), Month: int32(now.Month()), CardNumber: s.senderCardNumber,
 		})
 		s.Require().NoError(err)
@@ -415,7 +415,7 @@ func (s *TransferGapiTestSuite) Test9_TransferStats_Status() {
 	})
 
 	s.T().Run("YearlyFailedByCard", func(t *testing.T) {
-		resp, err := s.statusClient.FindYearlyTransferStatusFailedByCardNumber(ctx, &statspb.FindYearTransferStatusCardNumber{
+		resp, err := s.statusClient.FindYearlyTransferStatusFailedByCardNumber(ctx, &pb.FindYearTransferStatusCardNumber{
 			Year: int32(now.Year()), CardNumber: s.senderCardNumber,
 		})
 		s.Require().NoError(err)

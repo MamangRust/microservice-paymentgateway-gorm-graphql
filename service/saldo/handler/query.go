@@ -9,10 +9,10 @@ import (
 	pbhelpers "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	saldo_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/saldo_errors/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type saldoQueryHandleGrpc struct {
@@ -24,6 +24,12 @@ func NewSaldoQueryHandleGrpc(query service.SaldoQueryService) SaldoQueryHandleGr
 	return &saldoQueryHandleGrpc{service: query}
 }
 
+func formatSaldoTime(tp *time.Time) string {
+	if tp == nil {
+		return ""
+	}
+	return tp.Format(time.RFC3339)
+}
 
 func saldoTimeValue(v interface{}) int64 {
 	switch value := v.(type) {
@@ -63,10 +69,10 @@ func (s *saldoQueryHandleGrpc) FindAllSaldo(ctx context.Context, req *pb.FindAll
 			SaldoId:        saldo.SaldoID,
 			CardNumber:     saldo.CardNumber,
 			TotalBalance:   saldo.TotalBalance,
-			WithdrawTime:   convert.FormatTimeRFC3339(saldo.WithdrawTime),
+			WithdrawTime:   formatSaldoTime(saldo.WithdrawTime),
 			WithdrawAmount: saldoTimeValue(saldo.WithdrawAmount),
-			CreatedAt:      convert.FormatTimeRFC3339(saldo.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(saldo.UpdatedAt),
+			CreatedAt:      formatSaldoTime(saldo.CreatedAt),
+			UpdatedAt:      formatSaldoTime(saldo.UpdatedAt),
 		}
 	}
 
@@ -104,10 +110,10 @@ func (s *saldoQueryHandleGrpc) FindByIdSaldo(ctx context.Context, req *pb.FindBy
 			SaldoId:        saldo.SaldoID,
 			CardNumber:     saldo.CardNumber,
 			TotalBalance:   saldo.TotalBalance,
-			WithdrawTime:   convert.FormatTimeRFC3339(saldo.WithdrawTime),
+			WithdrawTime:   formatSaldoTime(saldo.WithdrawTime),
 			WithdrawAmount: saldoTimeValue(saldo.WithdrawAmount),
-			CreatedAt:      convert.FormatTimeRFC3339(saldo.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(saldo.UpdatedAt),
+			CreatedAt:      formatSaldoTime(saldo.CreatedAt),
+			UpdatedAt:      formatSaldoTime(saldo.UpdatedAt),
 		},
 	}, nil
 }
@@ -130,9 +136,9 @@ func (s *saldoQueryHandleGrpc) FindByCardNumber(ctx context.Context, req *pbcard
 			SaldoId:      saldo.SaldoID,
 			CardNumber:   saldo.CardNumber,
 			TotalBalance: saldo.TotalBalance,
-			WithdrawTime: convert.FormatTimeRFC3339(saldo.WithdrawTime),
-			CreatedAt:    convert.FormatTimeRFC3339(saldo.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(saldo.UpdatedAt),
+			WithdrawTime: formatSaldoTime(saldo.WithdrawTime),
+			CreatedAt:    formatSaldoTime(saldo.CreatedAt),
+			UpdatedAt:    formatSaldoTime(saldo.UpdatedAt),
 		},
 	}, nil
 }
@@ -157,15 +163,19 @@ func (s *saldoQueryHandleGrpc) FindByActive(ctx context.Context, req *pb.FindAll
 
 	protoSaldos := make([]*pb.SaldoResponseDeleteAt, len(res))
 	for i, saldo := range res {
+		var deletedAt *wrapperspb.StringValue
+		if saldo.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: saldo.DeletedAt.Format(time.RFC3339)}
+		}
 		protoSaldos[i] = &pb.SaldoResponseDeleteAt{
 			SaldoId:        saldo.SaldoID,
 			CardNumber:     saldo.CardNumber,
 			TotalBalance:   saldo.TotalBalance,
-			WithdrawTime:   convert.FormatTimeRFC3339(saldo.WithdrawTime),
+			WithdrawTime:   formatSaldoTime(saldo.WithdrawTime),
 			WithdrawAmount: saldoTimeValue(saldo.WithdrawAmount),
-			CreatedAt:      convert.FormatTimeRFC3339(saldo.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(saldo.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(saldo.DeletedAt),
+			CreatedAt:      formatSaldoTime(saldo.CreatedAt),
+			UpdatedAt:      formatSaldoTime(saldo.UpdatedAt),
+			DeletedAt:      deletedAt,
 		}
 	}
 
@@ -205,15 +215,19 @@ func (s *saldoQueryHandleGrpc) FindByTrashed(ctx context.Context, req *pb.FindAl
 
 	protoSaldos := make([]*pb.SaldoResponseDeleteAt, len(res))
 	for i, saldo := range res {
+		var deletedAt *wrapperspb.StringValue
+		if saldo.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: saldo.DeletedAt.Format(time.RFC3339)}
+		}
 		protoSaldos[i] = &pb.SaldoResponseDeleteAt{
 			SaldoId:        saldo.SaldoID,
 			CardNumber:     saldo.CardNumber,
 			TotalBalance:   saldo.TotalBalance,
-			WithdrawTime:   convert.FormatTimeRFC3339(saldo.WithdrawTime),
+			WithdrawTime:   formatSaldoTime(saldo.WithdrawTime),
 			WithdrawAmount: saldoTimeValue(saldo.WithdrawAmount),
-			CreatedAt:      convert.FormatTimeRFC3339(saldo.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(saldo.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(saldo.DeletedAt),
+			CreatedAt:      formatSaldoTime(saldo.CreatedAt),
+			UpdatedAt:      formatSaldoTime(saldo.UpdatedAt),
+			DeletedAt:      deletedAt,
 		}
 	}
 

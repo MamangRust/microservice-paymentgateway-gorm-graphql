@@ -8,10 +8,10 @@ import (
 	pbhelper "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/transfer/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	transfer_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/transfer_errors/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type transferQueryHandleGrpc struct {
@@ -62,6 +62,14 @@ func (s *transferQueryHandleGrpc) FindAllTransfer(ctx context.Context, request *
 	transferResponses := make([]*pb.TransferResponse, len(transfers))
 	for i, t := range transfers {
 		transfer := t.Transfer
+		createdAt := ""
+		updatedAt := ""
+		if transfer.CreatedAt != nil {
+			createdAt = transfer.CreatedAt.Format(time.RFC3339)
+		}
+		if transfer.UpdatedAt != nil {
+			updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+		}
 		transferResponses[i] = &pb.TransferResponse{
 			Id:             int32(transfer.TransferID),
 			TransferNo:     transfer.TransferNo,
@@ -69,8 +77,8 @@ func (s *transferQueryHandleGrpc) FindAllTransfer(ctx context.Context, request *
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		}
 	}
 
@@ -95,6 +103,15 @@ func (s *transferQueryHandleGrpc) FindByIdTransfer(ctx context.Context, request 
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	if transfer.CreatedAt != nil {
+		createdAt = transfer.CreatedAt.Format(time.RFC3339)
+	}
+	if transfer.UpdatedAt != nil {
+		updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return &pb.ApiResponseTransfer{
 		Status:  "success",
 		Message: "Successfully fetch transfer record",
@@ -105,8 +122,8 @@ func (s *transferQueryHandleGrpc) FindByIdTransfer(ctx context.Context, request 
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		},
 	}, nil
 }
@@ -126,6 +143,14 @@ func (s *transferQueryHandleGrpc) FindTransferByTransferFrom(ctx context.Context
 
 	transferResponses := make([]*pb.TransferResponse, len(transfers))
 	for i, transfer := range transfers {
+		createdAt := ""
+		updatedAt := ""
+		if transfer.CreatedAt != nil {
+			createdAt = transfer.CreatedAt.Format(time.RFC3339)
+		}
+		if transfer.UpdatedAt != nil {
+			updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+		}
 		transferResponses[i] = &pb.TransferResponse{
 			Id:             int32(transfer.TransferID),
 			TransferNo:     transfer.TransferNo,
@@ -133,8 +158,8 @@ func (s *transferQueryHandleGrpc) FindTransferByTransferFrom(ctx context.Context
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		}
 	}
 
@@ -160,6 +185,14 @@ func (s *transferQueryHandleGrpc) FindTransferByTransferTo(ctx context.Context, 
 
 	transferResponses := make([]*pb.TransferResponse, len(transfers))
 	for i, transfer := range transfers {
+		createdAt := ""
+		updatedAt := ""
+		if transfer.CreatedAt != nil {
+			createdAt = transfer.CreatedAt.Format(time.RFC3339)
+		}
+		if transfer.UpdatedAt != nil {
+			updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+		}
 		transferResponses[i] = &pb.TransferResponse{
 			Id:             int32(transfer.TransferID),
 			TransferNo:     transfer.TransferNo,
@@ -167,8 +200,8 @@ func (s *transferQueryHandleGrpc) FindTransferByTransferTo(ctx context.Context, 
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		}
 	}
 
@@ -215,6 +248,18 @@ func (s *transferQueryHandleGrpc) FindByActiveTransfer(ctx context.Context, req 
 	transferResponses := make([]*pb.TransferResponseDeleteAt, len(transfers))
 	for i, t := range transfers {
 		transfer := t.Transfer
+		createdAt := ""
+		updatedAt := ""
+		deletedAt := &wrapperspb.StringValue{}
+		if transfer.CreatedAt != nil {
+			createdAt = transfer.CreatedAt.Format(time.RFC3339)
+		}
+		if transfer.UpdatedAt != nil {
+			updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+		}
+		if transfer.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: transfer.DeletedAt.Format(time.RFC3339)}
+		}
 		transferResponses[i] = &pb.TransferResponseDeleteAt{
 			Id:             int32(transfer.TransferID),
 			TransferNo:     transfer.TransferNo,
@@ -222,9 +267,9 @@ func (s *transferQueryHandleGrpc) FindByActiveTransfer(ctx context.Context, req 
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(transfer.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		}
 	}
 
@@ -272,6 +317,18 @@ func (s *transferQueryHandleGrpc) FindByTrashedTransfer(ctx context.Context, req
 	transferResponses := make([]*pb.TransferResponseDeleteAt, len(transfers))
 	for i, t := range transfers {
 		transfer := t.Transfer
+		createdAt := ""
+		updatedAt := ""
+		deletedAt := &wrapperspb.StringValue{}
+		if transfer.CreatedAt != nil {
+			createdAt = transfer.CreatedAt.Format(time.RFC3339)
+		}
+		if transfer.UpdatedAt != nil {
+			updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+		}
+		if transfer.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: transfer.DeletedAt.Format(time.RFC3339)}
+		}
 		transferResponses[i] = &pb.TransferResponseDeleteAt{
 			Id:             int32(transfer.TransferID),
 			TransferNo:     transfer.TransferNo,
@@ -279,9 +336,9 @@ func (s *transferQueryHandleGrpc) FindByTrashedTransfer(ctx context.Context, req
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(transfer.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		}
 	}
 

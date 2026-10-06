@@ -2,7 +2,7 @@ package merchantapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -43,24 +43,24 @@ type MerchantTransactionResponseMapper interface {
 
 type MerchantStatsMethodResponseMapper interface {
 	// Maps monthly payment method statistics of a merchant to an API response.
-	ToApiResponseMonthlyPaymentMethods(ms *statspb.ApiResponseMerchantMonthlyPaymentMethod) *response.ApiResponseMerchantMonthlyPaymentMethod
+	ToApiResponseMonthlyPaymentMethods(ms *pbstats.ApiResponseMerchantMonthlyPaymentMethod) *response.ApiResponseMerchantMonthlyPaymentMethod
 
 	// Maps yearly payment method statistics of a merchant to an API response.
-	ToApiResponseYearlyPaymentMethods(ms *statspb.ApiResponseMerchantYearlyPaymentMethod) *response.ApiResponseMerchantYearlyPaymentMethod
+	ToApiResponseYearlyPaymentMethods(ms *pbstats.ApiResponseMerchantYearlyPaymentMethod) *response.ApiResponseMerchantYearlyPaymentMethod
 }
 
 type MerchantStatsAmountResponseMapper interface {
 	// Maps monthly financial amounts (e.g., transactions, top-ups) to an API response.
-	ToApiResponseMonthlyAmounts(ms *statspb.ApiResponseMerchantMonthlyAmount) *response.ApiResponseMerchantMonthlyAmount
+	ToApiResponseMonthlyAmounts(ms *pbstats.ApiResponseMerchantMonthlyAmount) *response.ApiResponseMerchantMonthlyAmount
 
 	// Maps yearly financial amounts (e.g., transactions, top-ups) to an API response.
-	ToApiResponseYearlyAmounts(ms *statspb.ApiResponseMerchantYearlyAmount) *response.ApiResponseMerchantYearlyAmount
+	ToApiResponseYearlyAmounts(ms *pbstats.ApiResponseMerchantYearlyAmount) *response.ApiResponseMerchantYearlyAmount
 }
 
 type MerchantStatsTotalAmountResponseMapper interface {
 	// Maps monthly total financial statistics across merchants to an API response.
-	ToApiResponseMonthlyTotalAmounts(ms *statspb.ApiResponseMerchantMonthlyTotalAmount) *response.ApiResponseMerchantMonthlyTotalAmount
+	ToApiResponseMonthlyTotalAmounts(ms *pbstats.ApiResponseMerchantMonthlyTotalAmount) *response.ApiResponseMerchantMonthlyTotalAmount
 
 	// Maps yearly total financial statistics across merchants to an API response.
-	ToApiResponseYearlyTotalAmounts(ms *statspb.ApiResponseMerchantYearlyTotalAmount) *response.ApiResponseMerchantYearlyTotalAmount
+	ToApiResponseYearlyTotalAmounts(ms *pbstats.ApiResponseMerchantYearlyTotalAmount) *response.ApiResponseMerchantYearlyTotalAmount
 }

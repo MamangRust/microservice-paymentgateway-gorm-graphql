@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbMerchantStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/merchant"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/stats-reader/repository"
 )
@@ -18,9 +18,9 @@ type MerchantRepository interface {
 }
 
 type MerchantStatsHandler struct {
-	statspb.UnimplementedMerchantStatsAmountServiceServer
-	statspb.UnimplementedMerchantStatsMethodServiceServer
-	statspb.UnimplementedMerchantStatsTotalAmountServiceServer
+	pbMerchantStats.UnimplementedMerchantStatsAmountServiceServer
+	pbMerchantStats.UnimplementedMerchantStatsMethodServiceServer
+	pbMerchantStats.UnimplementedMerchantStatsTotalAmountServiceServer
 	merchant.UnimplementedMerchantTransactionServiceServer
 	repo MerchantRepository
 	log  logger.LoggerInterface
@@ -73,67 +73,67 @@ func (h *MerchantStatsHandler) FindAllTransactionByApikey(ctx context.Context, r
 
 // --- Merchant Stats Amount Service ---
 
-func (h *MerchantStatsHandler) FindMonthlyAmountMerchant(ctx context.Context, req *statspb.FindYearMerchant) (*statspb.ApiResponseMerchantMonthlyAmount, error) {
+func (h *MerchantStatsHandler) FindMonthlyAmountMerchant(ctx context.Context, req *merchant.FindYearMerchant) (*pbMerchantStats.ApiResponseMerchantMonthlyAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyAmount{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyAmount{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyAmountMerchant(ctx context.Context, req *statspb.FindYearMerchant) (*statspb.ApiResponseMerchantYearlyAmount, error) {
+func (h *MerchantStatsHandler) FindYearlyAmountMerchant(ctx context.Context, req *merchant.FindYearMerchant) (*pbMerchantStats.ApiResponseMerchantYearlyAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "", nil, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantYearlyAmount{
+	return &pbMerchantStats.ApiResponseMerchantYearlyAmount{
 		Status: "success",
 		Data:   h.mapToMerchantYearlyAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindMonthlyAmountByMerchants(ctx context.Context, req *statspb.FindYearMerchantById) (*statspb.ApiResponseMerchantMonthlyAmount, error) {
+func (h *MerchantStatsHandler) FindMonthlyAmountByMerchants(ctx context.Context, req *merchant.FindYearMerchantById) (*pbMerchantStats.ApiResponseMerchantMonthlyAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "merchant_id", req.MerchantId, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyAmount{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyAmount{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyAmountByMerchants(ctx context.Context, req *statspb.FindYearMerchantById) (*statspb.ApiResponseMerchantYearlyAmount, error) {
+func (h *MerchantStatsHandler) FindYearlyAmountByMerchants(ctx context.Context, req *merchant.FindYearMerchantById) (*pbMerchantStats.ApiResponseMerchantYearlyAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "merchant_id", req.MerchantId, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantYearlyAmount{
+	return &pbMerchantStats.ApiResponseMerchantYearlyAmount{
 		Status: "success",
 		Data:   h.mapToMerchantYearlyAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindMonthlyAmountByApikey(ctx context.Context, req *statspb.FindYearMerchantByApikey) (*statspb.ApiResponseMerchantMonthlyAmount, error) {
+func (h *MerchantStatsHandler) FindMonthlyAmountByApikey(ctx context.Context, req *merchant.FindYearMerchantByApikey) (*pbMerchantStats.ApiResponseMerchantMonthlyAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "apikey", req.ApiKey, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyAmount{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyAmount{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyAmountByApikey(ctx context.Context, req *statspb.FindYearMerchantByApikey) (*statspb.ApiResponseMerchantYearlyAmount, error) {
+func (h *MerchantStatsHandler) FindYearlyAmountByApikey(ctx context.Context, req *merchant.FindYearMerchantByApikey) (*pbMerchantStats.ApiResponseMerchantYearlyAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "apikey", req.ApiKey, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantYearlyAmount{
+	return &pbMerchantStats.ApiResponseMerchantYearlyAmount{
 		Status: "success",
 		Data:   h.mapToMerchantYearlyAmount(data),
 	}, nil
@@ -141,114 +141,114 @@ func (h *MerchantStatsHandler) FindYearlyAmountByApikey(ctx context.Context, req
 
 // --- Merchant Stats Method Service ---
 
-func (h *MerchantStatsHandler) FindMonthlyPaymentMethodsMerchant(ctx context.Context, req *statspb.FindYearMerchant) (*statspb.ApiResponseMerchantMonthlyPaymentMethod, error) {
+func (h *MerchantStatsHandler) FindMonthlyPaymentMethodsMerchant(ctx context.Context, req *merchant.FindYearMerchant) (*pbMerchantStats.ApiResponseMerchantMonthlyPaymentMethod, error) {
 	data, err := h.repo.GetMonthlyMethodStats(ctx, "transaction_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyPaymentMethod{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyPaymentMethod{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyMethod(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyPaymentMethodMerchant(ctx context.Context, req *statspb.FindYearMerchant) (*statspb.ApiResponseMerchantYearlyPaymentMethod, error) {
-	return &statspb.ApiResponseMerchantYearlyPaymentMethod{Status: "success"}, nil
+func (h *MerchantStatsHandler) FindYearlyPaymentMethodMerchant(ctx context.Context, req *merchant.FindYearMerchant) (*pbMerchantStats.ApiResponseMerchantYearlyPaymentMethod, error) {
+	return &pbMerchantStats.ApiResponseMerchantYearlyPaymentMethod{Status: "success"}, nil
 }
 
-func (h *MerchantStatsHandler) FindMonthlyPaymentMethodByMerchants(ctx context.Context, req *statspb.FindYearMerchantById) (*statspb.ApiResponseMerchantMonthlyPaymentMethod, error) {
+func (h *MerchantStatsHandler) FindMonthlyPaymentMethodByMerchants(ctx context.Context, req *merchant.FindYearMerchantById) (*pbMerchantStats.ApiResponseMerchantMonthlyPaymentMethod, error) {
 	data, err := h.repo.GetMonthlyMethodStats(ctx, "transaction_events", "merchant_id", req.MerchantId, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyPaymentMethod{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyPaymentMethod{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyMethod(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyPaymentMethodByMerchants(ctx context.Context, req *statspb.FindYearMerchantById) (*statspb.ApiResponseMerchantYearlyPaymentMethod, error) {
-	return &statspb.ApiResponseMerchantYearlyPaymentMethod{Status: "success"}, nil
+func (h *MerchantStatsHandler) FindYearlyPaymentMethodByMerchants(ctx context.Context, req *merchant.FindYearMerchantById) (*pbMerchantStats.ApiResponseMerchantYearlyPaymentMethod, error) {
+	return &pbMerchantStats.ApiResponseMerchantYearlyPaymentMethod{Status: "success"}, nil
 }
 
-func (h *MerchantStatsHandler) FindMonthlyPaymentMethodByApikey(ctx context.Context, req *statspb.FindYearMerchantByApikey) (*statspb.ApiResponseMerchantMonthlyPaymentMethod, error) {
+func (h *MerchantStatsHandler) FindMonthlyPaymentMethodByApikey(ctx context.Context, req *merchant.FindYearMerchantByApikey) (*pbMerchantStats.ApiResponseMerchantMonthlyPaymentMethod, error) {
 	data, err := h.repo.GetMonthlyMethodStats(ctx, "transaction_events", "apikey", req.ApiKey, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyPaymentMethod{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyPaymentMethod{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyMethod(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyPaymentMethodByApikey(ctx context.Context, req *statspb.FindYearMerchantByApikey) (*statspb.ApiResponseMerchantYearlyPaymentMethod, error) {
-	return &statspb.ApiResponseMerchantYearlyPaymentMethod{Status: "success"}, nil
+func (h *MerchantStatsHandler) FindYearlyPaymentMethodByApikey(ctx context.Context, req *merchant.FindYearMerchantByApikey) (*pbMerchantStats.ApiResponseMerchantYearlyPaymentMethod, error) {
+	return &pbMerchantStats.ApiResponseMerchantYearlyPaymentMethod{Status: "success"}, nil
 }
 
 // --- Merchant Stats Total Amount Service ---
 
-func (h *MerchantStatsHandler) FindMonthlyTotalAmountMerchant(ctx context.Context, req *statspb.FindYearMerchant) (*statspb.ApiResponseMerchantMonthlyTotalAmount, error) {
+func (h *MerchantStatsHandler) FindMonthlyTotalAmountMerchant(ctx context.Context, req *merchant.FindYearMerchant) (*pbMerchantStats.ApiResponseMerchantMonthlyTotalAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyTotalAmount{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyTotalAmount{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyTotalAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyTotalAmountMerchant(ctx context.Context, req *statspb.FindYearMerchant) (*statspb.ApiResponseMerchantYearlyTotalAmount, error) {
+func (h *MerchantStatsHandler) FindYearlyTotalAmountMerchant(ctx context.Context, req *merchant.FindYearMerchant) (*pbMerchantStats.ApiResponseMerchantYearlyTotalAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "", nil, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantYearlyTotalAmount{
+	return &pbMerchantStats.ApiResponseMerchantYearlyTotalAmount{
 		Status: "success",
 		Data:   h.mapToMerchantYearlyTotalAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindMonthlyTotalAmountByMerchants(ctx context.Context, req *statspb.FindYearMerchantById) (*statspb.ApiResponseMerchantMonthlyTotalAmount, error) {
+func (h *MerchantStatsHandler) FindMonthlyTotalAmountByMerchants(ctx context.Context, req *merchant.FindYearMerchantById) (*pbMerchantStats.ApiResponseMerchantMonthlyTotalAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "merchant_id", req.MerchantId, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyTotalAmount{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyTotalAmount{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyTotalAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyTotalAmountByMerchants(ctx context.Context, req *statspb.FindYearMerchantById) (*statspb.ApiResponseMerchantYearlyTotalAmount, error) {
+func (h *MerchantStatsHandler) FindYearlyTotalAmountByMerchants(ctx context.Context, req *merchant.FindYearMerchantById) (*pbMerchantStats.ApiResponseMerchantYearlyTotalAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "merchant_id", req.MerchantId, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantYearlyTotalAmount{
+	return &pbMerchantStats.ApiResponseMerchantYearlyTotalAmount{
 		Status: "success",
 		Data:   h.mapToMerchantYearlyTotalAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindMonthlyTotalAmountByApikey(ctx context.Context, req *statspb.FindYearMerchantByApikey) (*statspb.ApiResponseMerchantMonthlyTotalAmount, error) {
+func (h *MerchantStatsHandler) FindMonthlyTotalAmountByApikey(ctx context.Context, req *merchant.FindYearMerchantByApikey) (*pbMerchantStats.ApiResponseMerchantMonthlyTotalAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "apikey", req.ApiKey, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantMonthlyTotalAmount{
+	return &pbMerchantStats.ApiResponseMerchantMonthlyTotalAmount{
 		Status: "success",
 		Data:   h.mapToMerchantMonthlyTotalAmount(data),
 	}, nil
 }
 
-func (h *MerchantStatsHandler) FindYearlyTotalAmountByApikey(ctx context.Context, req *statspb.FindYearMerchantByApikey) (*statspb.ApiResponseMerchantYearlyTotalAmount, error) {
+func (h *MerchantStatsHandler) FindYearlyTotalAmountByApikey(ctx context.Context, req *merchant.FindYearMerchantByApikey) (*pbMerchantStats.ApiResponseMerchantYearlyTotalAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "apikey", req.ApiKey, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseMerchantYearlyTotalAmount{
+	return &pbMerchantStats.ApiResponseMerchantYearlyTotalAmount{
 		Status: "success",
 		Data:   h.mapToMerchantYearlyTotalAmount(data),
 	}, nil
@@ -274,10 +274,10 @@ func (h *MerchantStatsHandler) mapToMerchantTransactions(data []map[string]inter
 	return results
 }
 
-func (h *MerchantStatsHandler) mapToMerchantMonthlyAmount(data []repository.MonthlyAmount) []*statspb.MerchantResponseMonthlyAmount {
-	var results []*statspb.MerchantResponseMonthlyAmount
+func (h *MerchantStatsHandler) mapToMerchantMonthlyAmount(data []repository.MonthlyAmount) []*pbMerchantStats.MerchantResponseMonthlyAmount {
+	var results []*pbMerchantStats.MerchantResponseMonthlyAmount
 	for _, d := range data {
-		results = append(results, &statspb.MerchantResponseMonthlyAmount{
+		results = append(results, &pbMerchantStats.MerchantResponseMonthlyAmount{
 			Month:       d.Month,
 			TotalAmount: d.TotalAmount,
 		})
@@ -285,10 +285,10 @@ func (h *MerchantStatsHandler) mapToMerchantMonthlyAmount(data []repository.Mont
 	return results
 }
 
-func (h *MerchantStatsHandler) mapToMerchantYearlyAmount(data []repository.YearlyAmount) []*statspb.MerchantResponseYearlyAmount {
-	var results []*statspb.MerchantResponseYearlyAmount
+func (h *MerchantStatsHandler) mapToMerchantYearlyAmount(data []repository.YearlyAmount) []*pbMerchantStats.MerchantResponseYearlyAmount {
+	var results []*pbMerchantStats.MerchantResponseYearlyAmount
 	for _, d := range data {
-		results = append(results, &statspb.MerchantResponseYearlyAmount{
+		results = append(results, &pbMerchantStats.MerchantResponseYearlyAmount{
 			Year:        d.Year,
 			TotalAmount: d.TotalAmount,
 		})
@@ -296,10 +296,10 @@ func (h *MerchantStatsHandler) mapToMerchantYearlyAmount(data []repository.Yearl
 	return results
 }
 
-func (h *MerchantStatsHandler) mapToMerchantMonthlyMethod(data []repository.MonthlyMethodStats) []*statspb.MerchantResponseMonthlyPaymentMethod {
-	var results []*statspb.MerchantResponseMonthlyPaymentMethod
+func (h *MerchantStatsHandler) mapToMerchantMonthlyMethod(data []repository.MonthlyMethodStats) []*pbMerchantStats.MerchantResponseMonthlyPaymentMethod {
+	var results []*pbMerchantStats.MerchantResponseMonthlyPaymentMethod
 	for _, d := range data {
-		results = append(results, &statspb.MerchantResponseMonthlyPaymentMethod{
+		results = append(results, &pbMerchantStats.MerchantResponseMonthlyPaymentMethod{
 			Month:         d.Month,
 			PaymentMethod: d.PaymentMethod,
 			TotalAmount:   d.TotalAmount,
@@ -308,10 +308,10 @@ func (h *MerchantStatsHandler) mapToMerchantMonthlyMethod(data []repository.Mont
 	return results
 }
 
-func (h *MerchantStatsHandler) mapToMerchantMonthlyTotalAmount(data []repository.MonthlyAmount) []*statspb.MerchantResponseMonthlyTotalAmount {
-	var results []*statspb.MerchantResponseMonthlyTotalAmount
+func (h *MerchantStatsHandler) mapToMerchantMonthlyTotalAmount(data []repository.MonthlyAmount) []*pbMerchantStats.MerchantResponseMonthlyTotalAmount {
+	var results []*pbMerchantStats.MerchantResponseMonthlyTotalAmount
 	for _, d := range data {
-		results = append(results, &statspb.MerchantResponseMonthlyTotalAmount{
+		results = append(results, &pbMerchantStats.MerchantResponseMonthlyTotalAmount{
 			Month:       d.Month,
 			Year:        d.Year,
 			TotalAmount: d.TotalAmount,
@@ -320,10 +320,10 @@ func (h *MerchantStatsHandler) mapToMerchantMonthlyTotalAmount(data []repository
 	return results
 }
 
-func (h *MerchantStatsHandler) mapToMerchantYearlyTotalAmount(data []repository.YearlyAmount) []*statspb.MerchantResponseYearlyTotalAmount {
-	var results []*statspb.MerchantResponseYearlyTotalAmount
+func (h *MerchantStatsHandler) mapToMerchantYearlyTotalAmount(data []repository.YearlyAmount) []*pbMerchantStats.MerchantResponseYearlyTotalAmount {
+	var results []*pbMerchantStats.MerchantResponseYearlyTotalAmount
 	for _, d := range data {
-		results = append(results, &statspb.MerchantResponseYearlyTotalAmount{
+		results = append(results, &pbMerchantStats.MerchantResponseYearlyTotalAmount{
 			Year:        d.Year,
 			TotalAmount: d.TotalAmount,
 		})

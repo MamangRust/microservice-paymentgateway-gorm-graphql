@@ -2,7 +2,7 @@ package withdrawapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -38,22 +38,22 @@ type WithdrawCommandResponseMapper interface {
 
 type WithdrawStatsStatusResponseMapper interface {
 	// Converts monthly successful withdraw statistics into an API response.
-	ToApiResponseWithdrawMonthStatusSuccess(pbResponse *statspb.ApiResponseWithdrawMonthStatusSuccess) *response.ApiResponseWithdrawMonthStatusSuccess
+	ToApiResponseWithdrawMonthStatusSuccess(pbResponse *pbstats.ApiResponseWithdrawMonthStatusSuccess) *response.ApiResponseWithdrawMonthStatusSuccess
 
 	// Converts yearly successful withdraw statistics into an API response.
-	ToApiResponseWithdrawYearStatusSuccess(pbResponse *statspb.ApiResponseWithdrawYearStatusSuccess) *response.ApiResponseWithdrawYearStatusSuccess
+	ToApiResponseWithdrawYearStatusSuccess(pbResponse *pbstats.ApiResponseWithdrawYearStatusSuccess) *response.ApiResponseWithdrawYearStatusSuccess
 
 	// Converts monthly failed withdraw statistics into an API response.
-	ToApiResponseWithdrawMonthStatusFailed(pbResponse *statspb.ApiResponseWithdrawMonthStatusFailed) *response.ApiResponseWithdrawMonthStatusFailed
+	ToApiResponseWithdrawMonthStatusFailed(pbResponse *pbstats.ApiResponseWithdrawMonthStatusFailed) *response.ApiResponseWithdrawMonthStatusFailed
 
 	// Converts yearly failed withdraw statistics into an API response.
-	ToApiResponseWithdrawYearStatusFailed(pbResponse *statspb.ApiResponseWithdrawYearStatusFailed) *response.ApiResponseWithdrawYearStatusFailed
+	ToApiResponseWithdrawYearStatusFailed(pbResponse *pbstats.ApiResponseWithdrawYearStatusFailed) *response.ApiResponseWithdrawYearStatusFailed
 }
 
 type WithdrawStatsAmountResponseMapper interface {
 	// Converts monthly total withdraw amount statistics into an API response.
-	ToApiResponseWithdrawMonthAmount(pbResponse *statspb.ApiResponseWithdrawMonthAmount) *response.ApiResponseWithdrawMonthAmount
+	ToApiResponseWithdrawMonthAmount(pbResponse *pbstats.ApiResponseWithdrawMonthAmount) *response.ApiResponseWithdrawMonthAmount
 
 	// Converts yearly total withdraw amount statistics into an API response.
-	ToApiResponseWithdrawYearAmount(pbResponse *statspb.ApiResponseWithdrawYearAmount) *response.ApiResponseWithdrawYearAmount
+	ToApiResponseWithdrawYearAmount(pbResponse *pbstats.ApiResponseWithdrawYearAmount) *response.ApiResponseWithdrawYearAmount
 }

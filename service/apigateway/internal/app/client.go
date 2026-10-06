@@ -23,6 +23,7 @@ import (
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	otel_pkg "github.com/MamangRust/microservice-payment-gateway-grpc/pkg/otel"
 	redisclient "github.com/MamangRust/microservice-payment-gateway-grpc/pkg/redis"
+	"github.com/go-chi/chi/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -149,6 +150,7 @@ func getEnvOrDefault(key, defaultValue string) string {
 
 type Client struct {
 	Logger logger.LoggerInterface
+	Server *http.Server
 }
 
 func RunClient() (*Client, func(), error) {
@@ -227,20 +229,23 @@ func RunClient() (*Client, func(), error) {
 		Mencache: mencache,
 	})
 
-	port := getEnvOrDefault("CLIENT_PORT", "5000")
+	srv := setupGraphql(tokenManager, resolver, log)
 
 	go func() {
-		log.Info(fmt.Sprintf("🚀 Starting GraphQL server on :%s", port))
-		if err := setupGraphql(tokenManager, resolver, log); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Info(fmt.Sprintf("🚀 Starting GraphQL server on %s", srv.Addr))
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("GraphQL server error", zap.Error(err))
 		}
 	}()
 
 	shutdown := func() {
-		_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		log.Info("Shutting down GraphQL API Gateway...")
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Error("HTTP server shutdown error", zap.Error(err))
+		}
 		closeConnections(conns, log)
 
 		if err := telemetry.Shutdown(context.Background()); err != nil {
@@ -252,16 +257,22 @@ func RunClient() (*Client, func(), error) {
 
 	return &Client{
 		Logger: log,
+		Server: srv,
 	}, shutdown, nil
 }
 
-func setupGraphql(token auth.TokenManager, resolver *graph.Resolver, logger logger.LoggerInterface) error {
+func setupGraphql(token auth.TokenManager, resolver *graph.Resolver, logger logger.LoggerInterface) *http.Server {
 	port := getEnvOrDefault("CLIENT_PORT", "5000")
 
 	logger.Debug("Starting GraphQL server", zap.String("port", getEnvOrDefault("CLIENT_PORT", "5000")))
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{
 		Resolvers: resolver,
+		// RBAC is enforced per operation by the @hasRole directive, because
+		// every GraphQL operation shares the single POST /query endpoint.
+		Directives: graph.DirectiveRoot{
+			HasRole: middlewares.HasRole(resolver.RoleGraphql.Permission),
+		},
 	}))
 
 	srv.AddTransport(transport.Options{})
@@ -276,13 +287,19 @@ func setupGraphql(token auth.TokenManager, resolver *graph.Resolver, logger logg
 		Cache: lru.New[string](100),
 	})
 
-	http.Handle("/", playground.Handler("GraphQL Playground", "/query"))
-	http.Handle("/query", middlewares.AuthMiddleware(token, logger)(srv))
+	r := chi.NewRouter()
+
+	r.Get("/", playground.Handler("GraphQL Playground", "/query"))
+	r.Handle("/query", middlewares.AuthMiddleware(token, logger)(srv))
 
 	logger.Info("GraphQL Playground running",
 		zap.String("url", "http://localhost:"+port),
 		zap.String("endpoint", "/query"),
 	)
 
-	return http.ListenAndServe(":"+port, nil)
+	return &http.Server{
+		Addr:              ":" + port,
+		Handler:           r,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pbAISecurity "github.com/MamangRust/microservice-payment-gateway-grpc/pb/ai_security"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	saldo_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/repository"
@@ -264,7 +264,7 @@ func (s *WithdrawGapiTestSuite) Test7_WithdrawStats_Amount() {
 	s.Require().NoError(err)
 
 	s.T().Run("MonthlyAmount", func(t *testing.T) {
-		resp, err := s.statsClient.FindMonthlyWithdraws(ctx, &statspb.FindYearWithdrawStatus{Year: int32(now.Year())})
+		resp, err := s.statsClient.FindMonthlyWithdraws(ctx, &pb.FindYearWithdrawStatus{Year: int32(now.Year())})
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Equal("success", resp.Status)
@@ -272,7 +272,7 @@ func (s *WithdrawGapiTestSuite) Test7_WithdrawStats_Amount() {
 	})
 
 	s.T().Run("YearlyAmount", func(t *testing.T) {
-		resp, err := s.statsClient.FindYearlyWithdraws(ctx, &statspb.FindYearWithdrawStatus{Year: int32(now.Year())})
+		resp, err := s.statsClient.FindYearlyWithdraws(ctx, &pb.FindYearWithdrawStatus{Year: int32(now.Year())})
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Equal("success", resp.Status)
@@ -280,7 +280,7 @@ func (s *WithdrawGapiTestSuite) Test7_WithdrawStats_Amount() {
 	})
 
 	s.T().Run("MonthlyAmountByCard", func(t *testing.T) {
-		resp, err := s.statsClient.FindMonthlyWithdrawsByCardNumber(ctx, &statspb.FindYearWithdrawCardNumber{
+		resp, err := s.statsClient.FindMonthlyWithdrawsByCardNumber(ctx, &pb.FindYearWithdrawCardNumber{
 			Year: int32(now.Year()), CardNumber: s.cardNumber,
 		})
 		s.Require().NoError(err)
@@ -290,7 +290,7 @@ func (s *WithdrawGapiTestSuite) Test7_WithdrawStats_Amount() {
 	})
 
 	s.T().Run("YearlyAmountByCard", func(t *testing.T) {
-		resp, err := s.statsClient.FindYearlyWithdrawsByCardNumber(ctx, &statspb.FindYearWithdrawCardNumber{
+		resp, err := s.statsClient.FindYearlyWithdrawsByCardNumber(ctx, &pb.FindYearWithdrawCardNumber{
 			Year: int32(now.Year()), CardNumber: s.cardNumber,
 		})
 		s.Require().NoError(err)
@@ -305,7 +305,7 @@ func (s *WithdrawGapiTestSuite) Test8_WithdrawStats_Status() {
 	now := time.Now()
 
 	s.T().Run("MonthlySuccess", func(t *testing.T) {
-		resp, err := s.statusClient.FindMonthlyWithdrawStatusSuccess(ctx, &statspb.FindMonthlyWithdrawStatus{
+		resp, err := s.statusClient.FindMonthlyWithdrawStatusSuccess(ctx, &pb.FindMonthlyWithdrawStatus{
 			Year: int32(now.Year()), Month: int32(now.Month()),
 		})
 		s.Require().NoError(err)
@@ -315,7 +315,7 @@ func (s *WithdrawGapiTestSuite) Test8_WithdrawStats_Status() {
 	})
 
 	s.T().Run("YearlyFailed", func(t *testing.T) {
-		resp, err := s.statusClient.FindYearlyWithdrawStatusFailed(ctx, &statspb.FindYearWithdrawStatus{Year: int32(now.Year())})
+		resp, err := s.statusClient.FindYearlyWithdrawStatusFailed(ctx, &pb.FindYearWithdrawStatus{Year: int32(now.Year())})
 		s.Require().NoError(err)
 		s.Require().NotNil(resp)
 		s.Equal("success", resp.Status)
@@ -323,7 +323,7 @@ func (s *WithdrawGapiTestSuite) Test8_WithdrawStats_Status() {
 	})
 
 	s.T().Run("MonthlySuccessByCard", func(t *testing.T) {
-		resp, err := s.statusClient.FindMonthlyWithdrawStatusSuccessCardNumber(ctx, &statspb.FindMonthlyWithdrawStatusCardNumber{
+		resp, err := s.statusClient.FindMonthlyWithdrawStatusSuccessCardNumber(ctx, &pb.FindMonthlyWithdrawStatusCardNumber{
 			Year: int32(now.Year()), Month: int32(now.Month()), CardNumber: s.cardNumber,
 		})
 		s.Require().NoError(err)
@@ -333,7 +333,7 @@ func (s *WithdrawGapiTestSuite) Test8_WithdrawStats_Status() {
 	})
 
 	s.T().Run("YearlyFailedByCard", func(t *testing.T) {
-		resp, err := s.statusClient.FindYearlyWithdrawStatusFailedCardNumber(ctx, &statspb.FindYearWithdrawStatusCardNumber{
+		resp, err := s.statusClient.FindYearlyWithdrawStatusFailedCardNumber(ctx, &pb.FindYearWithdrawStatusCardNumber{
 			Year: int32(now.Year()), CardNumber: s.cardNumber,
 		})
 		s.Require().NoError(err)

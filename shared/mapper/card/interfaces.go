@@ -2,7 +2,7 @@ package cardapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -48,11 +48,11 @@ type CardDashboardResponseMapper interface {
 type CardStatsBalanceResponseMapper interface {
 	// ToApiResponseMonthlyBalances maps a gRPC response containing monthly balance statistics
 	// to an HTTP API response format.
-	ToApiResponseMonthlyBalances(cards *statspb.ApiResponseMonthlyBalance) *response.ApiResponseMonthlyBalance
+	ToApiResponseMonthlyBalances(cards *pbstats.ApiResponseMonthlyBalance) *response.ApiResponseMonthlyBalance
 
 	// ToApiResponseYearlyBalances maps a gRPC response containing yearly balance statistics
 	// to an HTTP API response format.
-	ToApiResponseYearlyBalances(cards *statspb.ApiResponseYearlyBalance) *response.ApiResponseYearlyBalance
+	ToApiResponseYearlyBalances(cards *pbstats.ApiResponseYearlyBalance) *response.ApiResponseYearlyBalance
 }
 
 type CardStatsAmountResponseMapper interface {

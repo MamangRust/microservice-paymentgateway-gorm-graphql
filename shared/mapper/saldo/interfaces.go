@@ -2,7 +2,7 @@ package saldoapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -35,16 +35,16 @@ type SaldoCommandResponseMapper interface {
 
 type SaldoStatsTotalResponseMapper interface {
 	// Converts monthly total saldo values into an API response.
-	ToApiResponseMonthTotalSaldo(pbResponse *statspb.ApiResponseMonthTotalSaldo) *response.ApiResponseMonthTotalSaldo
+	ToApiResponseMonthTotalSaldo(pbResponse *pbstats.ApiResponseMonthTotalSaldo) *response.ApiResponseMonthTotalSaldo
 
 	// Converts yearly total saldo values into an API response.
-	ToApiResponseYearTotalSaldo(pbResponse *statspb.ApiResponseYearTotalSaldo) *response.ApiResponseYearTotalSaldo
+	ToApiResponseYearTotalSaldo(pbResponse *pbstats.ApiResponseYearTotalSaldo) *response.ApiResponseYearTotalSaldo
 }
 
 type SaldoStatsBalanceResponseMapper interface {
 	// Converts monthly saldo balances into an API response.
-	ToApiResponseMonthSaldoBalances(pbResponse *statspb.ApiResponseMonthSaldoBalances) *response.ApiResponseMonthSaldoBalances
+	ToApiResponseMonthSaldoBalances(pbResponse *pbstats.ApiResponseMonthSaldoBalances) *response.ApiResponseMonthSaldoBalances
 
 	// Converts yearly saldo balances into an API response.
-	ToApiResponseYearSaldoBalances(pbResponse *statspb.ApiResponseYearSaldoBalances) *response.ApiResponseYearSaldoBalances
+	ToApiResponseYearSaldoBalances(pbResponse *pbstats.ApiResponseYearSaldoBalances) *response.ApiResponseYearSaldoBalances
 }

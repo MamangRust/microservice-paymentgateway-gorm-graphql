@@ -3,7 +3,8 @@ package handler
 import (
 	"context"
 
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction"
+	pbTransactionStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/transaction"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/stats-reader/repository"
 )
@@ -18,9 +19,9 @@ type TransactionRepository interface {
 }
 
 type TransactionStatsHandler struct {
-	statspb.UnimplementedTransactionStatsAmountServiceServer
-	statspb.UnimplementedTransactionStatsMethodServiceServer
-	statspb.UnimplementedTransactionStatsStatusServiceServer
+	pbTransactionStats.UnimplementedTransactionStatsAmountServiceServer
+	pbTransactionStats.UnimplementedTransactionStatsMethodServiceServer
+	pbTransactionStats.UnimplementedTransactionStatsStatusServiceServer
 	repo TransactionRepository
 	log  logger.LoggerInterface
 }
@@ -34,48 +35,48 @@ func NewTransactionStatsHandler(repo TransactionRepository, log logger.LoggerInt
 
 // --- Transaction Stats Amount Service ---
 
-func (h *TransactionStatsHandler) FindMonthlyAmounts(ctx context.Context, req *statspb.FindYearTransactionStatus) (*statspb.ApiResponseTransactionMonthAmount, error) {
+func (h *TransactionStatsHandler) FindMonthlyAmounts(ctx context.Context, req *transaction.FindYearTransactionStatus) (*pbTransactionStats.ApiResponseTransactionMonthAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthAmount{
+	return &pbTransactionStats.ApiResponseTransactionMonthAmount{
 		Status:  "success",
 		Message: "Retrieved monthly transaction amounts",
 		Data:    h.mapToTransactionMonthAmountData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyAmounts(ctx context.Context, req *statspb.FindYearTransactionStatus) (*statspb.ApiResponseTransactionYearAmount, error) {
+func (h *TransactionStatsHandler) FindYearlyAmounts(ctx context.Context, req *transaction.FindYearTransactionStatus) (*pbTransactionStats.ApiResponseTransactionYearAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "", nil, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearAmount{
+	return &pbTransactionStats.ApiResponseTransactionYearAmount{
 		Status:  "success",
 		Message: "Retrieved yearly transaction amounts",
 		Data:    h.mapToTransactionYearAmountData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindMonthlyAmountsByCardNumber(ctx context.Context, req *statspb.FindByYearCardNumberTransactionRequest) (*statspb.ApiResponseTransactionMonthAmount, error) {
+func (h *TransactionStatsHandler) FindMonthlyAmountsByCardNumber(ctx context.Context, req *transaction.FindByYearCardNumberTransactionRequest) (*pbTransactionStats.ApiResponseTransactionMonthAmount, error) {
 	data, err := h.repo.GetMonthlyAmounts(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthAmount{
+	return &pbTransactionStats.ApiResponseTransactionMonthAmount{
 		Status:  "success",
 		Message: "Retrieved monthly transaction amounts by card number",
 		Data:    h.mapToTransactionMonthAmountData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyAmountsByCardNumber(ctx context.Context, req *statspb.FindByYearCardNumberTransactionRequest) (*statspb.ApiResponseTransactionYearAmount, error) {
+func (h *TransactionStatsHandler) FindYearlyAmountsByCardNumber(ctx context.Context, req *transaction.FindByYearCardNumberTransactionRequest) (*pbTransactionStats.ApiResponseTransactionYearAmount, error) {
 	data, err := h.repo.GetYearlyAmounts(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearAmount{
+	return &pbTransactionStats.ApiResponseTransactionYearAmount{
 		Status:  "success",
 		Message: "Retrieved yearly transaction amounts by card number",
 		Data:    h.mapToTransactionYearAmountData(data),
@@ -84,48 +85,48 @@ func (h *TransactionStatsHandler) FindYearlyAmountsByCardNumber(ctx context.Cont
 
 // --- Transaction Stats Method Service ---
 
-func (h *TransactionStatsHandler) FindMonthlyPaymentMethods(ctx context.Context, req *statspb.FindYearTransactionStatus) (*statspb.ApiResponseTransactionMonthMethod, error) {
+func (h *TransactionStatsHandler) FindMonthlyPaymentMethods(ctx context.Context, req *transaction.FindYearTransactionStatus) (*pbTransactionStats.ApiResponseTransactionMonthMethod, error) {
 	data, err := h.repo.GetMonthlyMethodStats(ctx, "transaction_events", "", nil, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthMethod{
+	return &pbTransactionStats.ApiResponseTransactionMonthMethod{
 		Status:  "success",
 		Message: "Retrieved monthly transaction methods",
 		Data:    h.mapToTransactionMonthMethodData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyPaymentMethods(ctx context.Context, req *statspb.FindYearTransactionStatus) (*statspb.ApiResponseTransactionYearMethod, error) {
+func (h *TransactionStatsHandler) FindYearlyPaymentMethods(ctx context.Context, req *transaction.FindYearTransactionStatus) (*pbTransactionStats.ApiResponseTransactionYearMethod, error) {
 	data, err := h.repo.GetYearlyMethodStats(ctx, "transaction_events", "", nil, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearMethod{
+	return &pbTransactionStats.ApiResponseTransactionYearMethod{
 		Status:  "success",
 		Message: "Retrieved yearly transaction methods",
 		Data:    h.mapToTransactionYearMethodData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindMonthlyPaymentMethodsByCardNumber(ctx context.Context, req *statspb.FindByYearCardNumberTransactionRequest) (*statspb.ApiResponseTransactionMonthMethod, error) {
+func (h *TransactionStatsHandler) FindMonthlyPaymentMethodsByCardNumber(ctx context.Context, req *transaction.FindByYearCardNumberTransactionRequest) (*pbTransactionStats.ApiResponseTransactionMonthMethod, error) {
 	data, err := h.repo.GetMonthlyMethodStats(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthMethod{
+	return &pbTransactionStats.ApiResponseTransactionMonthMethod{
 		Status:  "success",
 		Message: "Retrieved monthly transaction methods by card number",
 		Data:    h.mapToTransactionMonthMethodData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyPaymentMethodsByCardNumber(ctx context.Context, req *statspb.FindByYearCardNumberTransactionRequest) (*statspb.ApiResponseTransactionYearMethod, error) {
+func (h *TransactionStatsHandler) FindYearlyPaymentMethodsByCardNumber(ctx context.Context, req *transaction.FindByYearCardNumberTransactionRequest) (*pbTransactionStats.ApiResponseTransactionYearMethod, error) {
 	data, err := h.repo.GetYearlyMethodStats(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year), int(req.Year))
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearMethod{
+	return &pbTransactionStats.ApiResponseTransactionYearMethod{
 		Status:  "success",
 		Message: "Retrieved yearly transaction methods by card number",
 		Data:    h.mapToTransactionYearMethodData(data),
@@ -134,96 +135,96 @@ func (h *TransactionStatsHandler) FindYearlyPaymentMethodsByCardNumber(ctx conte
 
 // --- Transaction Stats Status Service ---
 
-func (h *TransactionStatsHandler) FindMonthlyTransactionStatusSuccess(ctx context.Context, req *statspb.FindMonthlyTransactionStatus) (*statspb.ApiResponseTransactionMonthStatusSuccess, error) {
+func (h *TransactionStatsHandler) FindMonthlyTransactionStatusSuccess(ctx context.Context, req *transaction.FindMonthlyTransactionStatus) (*pbTransactionStats.ApiResponseTransactionMonthStatusSuccess, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "transaction_events", "", nil, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthStatusSuccess{
+	return &pbTransactionStats.ApiResponseTransactionMonthStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved monthly transaction status success",
 		Data:    h.mapToTransactionMonthStatusSuccessData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyTransactionStatusSuccess(ctx context.Context, req *statspb.FindYearTransactionStatus) (*statspb.ApiResponseTransactionYearStatusSuccess, error) {
+func (h *TransactionStatsHandler) FindYearlyTransactionStatusSuccess(ctx context.Context, req *transaction.FindYearTransactionStatus) (*pbTransactionStats.ApiResponseTransactionYearStatusSuccess, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "transaction_events", "", nil, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearStatusSuccess{
+	return &pbTransactionStats.ApiResponseTransactionYearStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved yearly transaction status success",
 		Data:    h.mapToTransactionYearStatusSuccessData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindMonthlyTransactionStatusFailed(ctx context.Context, req *statspb.FindMonthlyTransactionStatus) (*statspb.ApiResponseTransactionMonthStatusFailed, error) {
+func (h *TransactionStatsHandler) FindMonthlyTransactionStatusFailed(ctx context.Context, req *transaction.FindMonthlyTransactionStatus) (*pbTransactionStats.ApiResponseTransactionMonthStatusFailed, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "transaction_events", "", nil, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthStatusFailed{
+	return &pbTransactionStats.ApiResponseTransactionMonthStatusFailed{
 		Status:  "success",
 		Message: "Retrieved monthly transaction status failed",
 		Data:    h.mapToTransactionMonthStatusFailedData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyTransactionStatusFailed(ctx context.Context, req *statspb.FindYearTransactionStatus) (*statspb.ApiResponseTransactionYearStatusFailed, error) {
+func (h *TransactionStatsHandler) FindYearlyTransactionStatusFailed(ctx context.Context, req *transaction.FindYearTransactionStatus) (*pbTransactionStats.ApiResponseTransactionYearStatusFailed, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "transaction_events", "", nil, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearStatusFailed{
+	return &pbTransactionStats.ApiResponseTransactionYearStatusFailed{
 		Status:  "success",
 		Message: "Retrieved yearly transaction status failed",
 		Data:    h.mapToTransactionYearStatusFailedData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindMonthlyTransactionStatusSuccessByCardNumber(ctx context.Context, req *statspb.FindMonthlyTransactionStatusCardNumber) (*statspb.ApiResponseTransactionMonthStatusSuccess, error) {
+func (h *TransactionStatsHandler) FindMonthlyTransactionStatusSuccessByCardNumber(ctx context.Context, req *transaction.FindMonthlyTransactionStatusCardNumber) (*pbTransactionStats.ApiResponseTransactionMonthStatusSuccess, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthStatusSuccess{
+	return &pbTransactionStats.ApiResponseTransactionMonthStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved monthly transaction status success by card number",
 		Data:    h.mapToTransactionMonthStatusSuccessData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyTransactionStatusSuccessByCardNumber(ctx context.Context, req *statspb.FindYearTransactionStatusCardNumber) (*statspb.ApiResponseTransactionYearStatusSuccess, error) {
+func (h *TransactionStatsHandler) FindYearlyTransactionStatusSuccessByCardNumber(ctx context.Context, req *transaction.FindYearTransactionStatusCardNumber) (*pbTransactionStats.ApiResponseTransactionYearStatusSuccess, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year), "success")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearStatusSuccess{
+	return &pbTransactionStats.ApiResponseTransactionYearStatusSuccess{
 		Status:  "success",
 		Message: "Retrieved yearly transaction status success by card number",
 		Data:    h.mapToTransactionYearStatusSuccessData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindMonthlyTransactionStatusFailedByCardNumber(ctx context.Context, req *statspb.FindMonthlyTransactionStatusCardNumber) (*statspb.ApiResponseTransactionMonthStatusFailed, error) {
+func (h *TransactionStatsHandler) FindMonthlyTransactionStatusFailedByCardNumber(ctx context.Context, req *transaction.FindMonthlyTransactionStatusCardNumber) (*pbTransactionStats.ApiResponseTransactionMonthStatusFailed, error) {
 	data, err := h.repo.GetMonthlyStatusStats(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionMonthStatusFailed{
+	return &pbTransactionStats.ApiResponseTransactionMonthStatusFailed{
 		Status:  "success",
 		Message: "Retrieved monthly transaction status failed by card number",
 		Data:    h.mapToTransactionMonthStatusFailedData(data),
 	}, nil
 }
 
-func (h *TransactionStatsHandler) FindYearlyTransactionStatusFailedByCardNumber(ctx context.Context, req *statspb.FindYearTransactionStatusCardNumber) (*statspb.ApiResponseTransactionYearStatusFailed, error) {
+func (h *TransactionStatsHandler) FindYearlyTransactionStatusFailedByCardNumber(ctx context.Context, req *transaction.FindYearTransactionStatusCardNumber) (*pbTransactionStats.ApiResponseTransactionYearStatusFailed, error) {
 	data, err := h.repo.GetYearlyStatusStats(ctx, "transaction_events", "card_number", req.CardNumber, int(req.Year), "failed")
 	if err != nil {
 		return nil, err
 	}
-	return &statspb.ApiResponseTransactionYearStatusFailed{
+	return &pbTransactionStats.ApiResponseTransactionYearStatusFailed{
 		Status:  "success",
 		Message: "Retrieved yearly transaction status failed by card number",
 		Data:    h.mapToTransactionYearStatusFailedData(data),
@@ -232,10 +233,10 @@ func (h *TransactionStatsHandler) FindYearlyTransactionStatusFailedByCardNumber(
 
 // --- Mappers ---
 
-func (h *TransactionStatsHandler) mapToTransactionMonthAmountData(data []repository.MonthlyAmount) []*statspb.TransactionMonthAmountResponse {
-	var results []*statspb.TransactionMonthAmountResponse
+func (h *TransactionStatsHandler) mapToTransactionMonthAmountData(data []repository.MonthlyAmount) []*pbTransactionStats.TransactionMonthAmountResponse {
+	var results []*pbTransactionStats.TransactionMonthAmountResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionMonthAmountResponse{
+		results = append(results, &pbTransactionStats.TransactionMonthAmountResponse{
 			Month:       d.Month,
 			TotalAmount: d.TotalAmount,
 		})
@@ -243,10 +244,10 @@ func (h *TransactionStatsHandler) mapToTransactionMonthAmountData(data []reposit
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionYearAmountData(data []repository.YearlyAmount) []*statspb.TransactionYearlyAmountResponse {
-	var results []*statspb.TransactionYearlyAmountResponse
+func (h *TransactionStatsHandler) mapToTransactionYearAmountData(data []repository.YearlyAmount) []*pbTransactionStats.TransactionYearlyAmountResponse {
+	var results []*pbTransactionStats.TransactionYearlyAmountResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionYearlyAmountResponse{
+		results = append(results, &pbTransactionStats.TransactionYearlyAmountResponse{
 			Year:        d.Year,
 			TotalAmount: d.TotalAmount,
 		})
@@ -254,10 +255,10 @@ func (h *TransactionStatsHandler) mapToTransactionYearAmountData(data []reposito
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionMonthMethodData(data []repository.MonthlyMethodStats) []*statspb.TransactionMonthMethodResponse {
-	var results []*statspb.TransactionMonthMethodResponse
+func (h *TransactionStatsHandler) mapToTransactionMonthMethodData(data []repository.MonthlyMethodStats) []*pbTransactionStats.TransactionMonthMethodResponse {
+	var results []*pbTransactionStats.TransactionMonthMethodResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionMonthMethodResponse{
+		results = append(results, &pbTransactionStats.TransactionMonthMethodResponse{
 			Month:             d.Month,
 			PaymentMethod:     d.PaymentMethod,
 			TotalTransactions: int32(d.TotalTransactions),
@@ -267,10 +268,10 @@ func (h *TransactionStatsHandler) mapToTransactionMonthMethodData(data []reposit
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionMonthStatusSuccessData(data []repository.MonthlyStatusStats) []*statspb.TransactionMonthStatusSuccessResponse {
-	var results []*statspb.TransactionMonthStatusSuccessResponse
+func (h *TransactionStatsHandler) mapToTransactionMonthStatusSuccessData(data []repository.MonthlyStatusStats) []*pbTransactionStats.TransactionMonthStatusSuccessResponse {
+	var results []*pbTransactionStats.TransactionMonthStatusSuccessResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionMonthStatusSuccessResponse{
+		results = append(results, &pbTransactionStats.TransactionMonthStatusSuccessResponse{
 			Year:         d.Year,
 			Month:        d.Month,
 			TotalSuccess: int32(d.TotalTransactions),
@@ -280,10 +281,10 @@ func (h *TransactionStatsHandler) mapToTransactionMonthStatusSuccessData(data []
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionYearStatusSuccessData(data []repository.YearlyStatusStats) []*statspb.TransactionYearStatusSuccessResponse {
-	var results []*statspb.TransactionYearStatusSuccessResponse
+func (h *TransactionStatsHandler) mapToTransactionYearStatusSuccessData(data []repository.YearlyStatusStats) []*pbTransactionStats.TransactionYearStatusSuccessResponse {
+	var results []*pbTransactionStats.TransactionYearStatusSuccessResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionYearStatusSuccessResponse{
+		results = append(results, &pbTransactionStats.TransactionYearStatusSuccessResponse{
 			Year:         d.Year,
 			TotalSuccess: int32(d.TotalTransactions),
 			TotalAmount:  d.TotalAmount,
@@ -292,10 +293,10 @@ func (h *TransactionStatsHandler) mapToTransactionYearStatusSuccessData(data []r
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionMonthStatusFailedData(data []repository.MonthlyStatusStats) []*statspb.TransactionMonthStatusFailedResponse {
-	var results []*statspb.TransactionMonthStatusFailedResponse
+func (h *TransactionStatsHandler) mapToTransactionMonthStatusFailedData(data []repository.MonthlyStatusStats) []*pbTransactionStats.TransactionMonthStatusFailedResponse {
+	var results []*pbTransactionStats.TransactionMonthStatusFailedResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionMonthStatusFailedResponse{
+		results = append(results, &pbTransactionStats.TransactionMonthStatusFailedResponse{
 			Year:        d.Year,
 			Month:       d.Month,
 			TotalFailed: int32(d.TotalTransactions),
@@ -305,10 +306,10 @@ func (h *TransactionStatsHandler) mapToTransactionMonthStatusFailedData(data []r
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionYearStatusFailedData(data []repository.YearlyStatusStats) []*statspb.TransactionYearStatusFailedResponse {
-	var results []*statspb.TransactionYearStatusFailedResponse
+func (h *TransactionStatsHandler) mapToTransactionYearStatusFailedData(data []repository.YearlyStatusStats) []*pbTransactionStats.TransactionYearStatusFailedResponse {
+	var results []*pbTransactionStats.TransactionYearStatusFailedResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionYearStatusFailedResponse{
+		results = append(results, &pbTransactionStats.TransactionYearStatusFailedResponse{
 			Year:        d.Year,
 			TotalFailed: int32(d.TotalTransactions),
 			TotalAmount: d.TotalAmount,
@@ -317,10 +318,10 @@ func (h *TransactionStatsHandler) mapToTransactionYearStatusFailedData(data []re
 	return results
 }
 
-func (h *TransactionStatsHandler) mapToTransactionYearMethodData(data []repository.YearlyMethodStats) []*statspb.TransactionYearMethodResponse {
-	var results []*statspb.TransactionYearMethodResponse
+func (h *TransactionStatsHandler) mapToTransactionYearMethodData(data []repository.YearlyMethodStats) []*pbTransactionStats.TransactionYearMethodResponse {
+	var results []*pbTransactionStats.TransactionYearMethodResponse
 	for _, d := range data {
-		results = append(results, &statspb.TransactionYearMethodResponse{
+		results = append(results, &pbTransactionStats.TransactionYearMethodResponse{
 			Year:              d.Year,
 			PaymentMethod:     d.PaymentMethod,
 			TotalTransactions: int32(d.TotalTransactions),

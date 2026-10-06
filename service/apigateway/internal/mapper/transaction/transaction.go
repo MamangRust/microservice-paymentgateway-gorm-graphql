@@ -21,11 +21,11 @@ func (t *transactionGraphqlMapper) ToGraphqlTransactionDelete(res *pb.ApiRespons
 }
 
 func (t *transactionGraphqlMapper) ToGraphqlPaginationTransaction(res *pb.ApiResponsePaginationTransaction) *model.APIResponsePaginationTransaction {
-	return &model.APIResponsePaginationTransaction{Status: res.Status, Message: res.Message, Data: t.mapTransactions(res.Data)}
+	return &model.APIResponsePaginationTransaction{Status: res.Status, Message: res.Message, Data: t.mapTransactions(res.Data), Pagination: graphqlmapper.MapPaginationMeta(res.PaginationMeta)}
 }
 
 func (t *transactionGraphqlMapper) ToGraphqlPaginationTransactionDeleteAt(res *pb.ApiResponsePaginationTransactionDeleteAt) *model.APIResponsePaginationTransactionDeleteAt {
-	return &model.APIResponsePaginationTransactionDeleteAt{Status: res.Status, Message: res.Message, Data: t.mapTransactionDeleteAts(res.Data)}
+	return &model.APIResponsePaginationTransactionDeleteAt{Status: res.Status, Message: res.Message, Data: t.mapTransactionDeleteAts(res.Data), Pagination: graphqlmapper.MapPaginationMeta(res.PaginationMeta)}
 }
 
 func (t *transactionGraphqlMapper) ToGraphqlResponseTransaction(res *pb.ApiResponseTransaction) *model.APIResponseTransaction {

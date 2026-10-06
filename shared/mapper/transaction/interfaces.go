@@ -2,7 +2,7 @@ package transactionapimapper
 
 import (
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pbstats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 
@@ -38,30 +38,30 @@ type TransactionCommandResponseMapper interface {
 
 type TransactionStatsStatusResponseMapper interface {
 	// Converts monthly transaction stats with success status into an API response.
-	ToApiResponseTransactionMonthStatusSuccess(pbResponse *statspb.ApiResponseTransactionMonthStatusSuccess) *response.ApiResponseTransactionMonthStatusSuccess
+	ToApiResponseTransactionMonthStatusSuccess(pbResponse *pbstats.ApiResponseTransactionMonthStatusSuccess) *response.ApiResponseTransactionMonthStatusSuccess
 
 	// Converts yearly transaction stats with success status into an API response.
-	ToApiResponseTransactionYearStatusSuccess(pbResponse *statspb.ApiResponseTransactionYearStatusSuccess) *response.ApiResponseTransactionYearStatusSuccess
+	ToApiResponseTransactionYearStatusSuccess(pbResponse *pbstats.ApiResponseTransactionYearStatusSuccess) *response.ApiResponseTransactionYearStatusSuccess
 
 	// Converts monthly transaction stats with failed status into an API response.
-	ToApiResponseTransactionMonthStatusFailed(pbResponse *statspb.ApiResponseTransactionMonthStatusFailed) *response.ApiResponseTransactionMonthStatusFailed
+	ToApiResponseTransactionMonthStatusFailed(pbResponse *pbstats.ApiResponseTransactionMonthStatusFailed) *response.ApiResponseTransactionMonthStatusFailed
 
 	// Converts yearly transaction stats with failed status into an API response.
-	ToApiResponseTransactionYearStatusFailed(pbResponse *statspb.ApiResponseTransactionYearStatusFailed) *response.ApiResponseTransactionYearStatusFailed
+	ToApiResponseTransactionYearStatusFailed(pbResponse *pbstats.ApiResponseTransactionYearStatusFailed) *response.ApiResponseTransactionYearStatusFailed
 }
 
 type TransactionStatsMethodResponseMapper interface {
 	// Converts monthly transaction statistics grouped by payment method into an API response.
-	ToApiResponseTransactionMonthMethod(pbResponse *statspb.ApiResponseTransactionMonthMethod) *response.ApiResponseTransactionMonthMethod
+	ToApiResponseTransactionMonthMethod(pbResponse *pbstats.ApiResponseTransactionMonthMethod) *response.ApiResponseTransactionMonthMethod
 
 	// Converts yearly transaction statistics grouped by payment method into an API response.
-	ToApiResponseTransactionYearMethod(pbResponse *statspb.ApiResponseTransactionYearMethod) *response.ApiResponseTransactionYearMethod
+	ToApiResponseTransactionYearMethod(pbResponse *pbstats.ApiResponseTransactionYearMethod) *response.ApiResponseTransactionYearMethod
 }
 
 type TransactionStatsAmountResponseMapper interface {
 	// Converts monthly transaction amount statistics into an API response.
-	ToApiResponseTransactionMonthAmount(pbResponse *statspb.ApiResponseTransactionMonthAmount) *response.ApiResponseTransactionMonthAmount
+	ToApiResponseTransactionMonthAmount(pbResponse *pbstats.ApiResponseTransactionMonthAmount) *response.ApiResponseTransactionMonthAmount
 
 	// Converts yearly transaction amount statistics into an API response.
-	ToApiResponseTransactionYearAmount(pbResponse *statspb.ApiResponseTransactionYearAmount) *response.ApiResponseTransactionYearAmount
+	ToApiResponseTransactionYearAmount(pbResponse *pbstats.ApiResponseTransactionYearAmount) *response.ApiResponseTransactionYearAmount
 }

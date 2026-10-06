@@ -25,27 +25,6 @@ func NewRoleQueryHandleGrpc(roleQuery service.RoleQueryService) RoleQueryHandler
 	}
 }
 
-func formatTime(t interface{}) string {
-	switch v := t.(type) {
-	case interface{ Format(string) string }:
-		return v.Format("2006-01-02")
-	default:
-		return ""
-	}
-}
-
-func formatTimePtr(t interface{}) string {
-	switch v := t.(type) {
-	case *interface{ Format(string) string }:
-		if v != nil {
-			return (*v).Format("2006-01-02")
-		}
-		return ""
-	default:
-		return ""
-	}
-}
-
 func (s *roleQueryHandleGrpc) FindAllRole(ctx context.Context, req *pb.FindAllRoleRequest) (*pb.ApiResponsePaginationRole, error) {
 	page := int(req.GetPage())
 	pageSize := int(req.GetPageSize())
@@ -277,36 +256,6 @@ func (s *roleQueryHandleGrpc) FindByIdRole(ctx context.Context, req *pb.FindById
 		Status:  "success",
 		Message: "Successfully fetched role",
 		Data:    protoRole,
-	}, nil
-}
-
-func (s *roleQueryHandleGrpc) FindByUserId(ctx context.Context, req *pb.FindByIdUserRoleRequest) (*pb.ApiResponsesRole, error) {
-	userID := int(req.GetUserId())
-
-	if userID == 0 {
-		return nil, role_errors.ErrGrpcRoleInvalidId
-	}
-
-	roles, err := s.roleQuery.FindByUserId(ctx, userID)
-
-	if err != nil {
-		return nil, errors.ToGrpcError(err)
-	}
-
-	protoRoles := make([]*pb.RoleResponse, len(roles))
-	for i, role := range roles {
-		protoRoles[i] = &pb.RoleResponse{
-			Id:        role.RoleID,
-			Name:      role.RoleName,
-			CreatedAt: formatCreatedAt(role.CreatedAt),
-			UpdatedAt: formatUpdatedAt(role.UpdatedAt),
-		}
-	}
-
-	return &pb.ApiResponsesRole{
-		Status:  "success",
-		Message: "Successfully fetched role by user id",
-		Data:    protoRoles,
 	}, nil
 }
 

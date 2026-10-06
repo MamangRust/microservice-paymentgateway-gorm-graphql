@@ -1,7 +1,7 @@
 package saldoapimapper
 
 import (
-	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats"
+	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/response"
 )
 

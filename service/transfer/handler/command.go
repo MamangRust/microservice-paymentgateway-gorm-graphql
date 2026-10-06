@@ -5,12 +5,13 @@ import (
 	"time"
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
+
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/transfer/service"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	transfer_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/transfer_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type transferCommandHandleGrpc struct {
@@ -42,6 +43,15 @@ func (s *transferCommandHandleGrpc) CreateTransfer(ctx context.Context, request 
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	if transfer.CreatedAt != nil {
+		createdAt = transfer.CreatedAt.Format(time.RFC3339)
+	}
+	if transfer.UpdatedAt != nil {
+		updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return &pb.ApiResponseTransfer{
 		Status:  "success",
 		Message: "Successfully created transfer",
@@ -52,8 +62,8 @@ func (s *transferCommandHandleGrpc) CreateTransfer(ctx context.Context, request 
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		},
 	}, nil
 }
@@ -82,6 +92,15 @@ func (s *transferCommandHandleGrpc) UpdateTransfer(ctx context.Context, request 
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	if transfer.CreatedAt != nil {
+		createdAt = transfer.CreatedAt.Format(time.RFC3339)
+	}
+	if transfer.UpdatedAt != nil {
+		updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return &pb.ApiResponseTransfer{
 		Status:  "success",
 		Message: "Successfully updated transfer",
@@ -92,8 +111,8 @@ func (s *transferCommandHandleGrpc) UpdateTransfer(ctx context.Context, request 
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
 		},
 	}, nil
 }
@@ -111,6 +130,19 @@ func (s *transferCommandHandleGrpc) TrashedTransfer(ctx context.Context, request
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	deletedAt := &wrapperspb.StringValue{}
+	if transfer.CreatedAt != nil {
+		createdAt = transfer.CreatedAt.Format(time.RFC3339)
+	}
+	if transfer.UpdatedAt != nil {
+		updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+	}
+	if transfer.DeletedAt != nil {
+		deletedAt = &wrapperspb.StringValue{Value: transfer.DeletedAt.Format(time.RFC3339)}
+	}
+
 	return &pb.ApiResponseTransferDeleteAt{
 		Status:  "success",
 		Message: "Successfully trashed transfer",
@@ -121,9 +153,9 @@ func (s *transferCommandHandleGrpc) TrashedTransfer(ctx context.Context, request
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(transfer.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		},
 	}, nil
 }
@@ -141,6 +173,19 @@ func (s *transferCommandHandleGrpc) RestoreTransfer(ctx context.Context, request
 		return nil, errors.ToGrpcError(err)
 	}
 
+	createdAt := ""
+	updatedAt := ""
+	deletedAt := &wrapperspb.StringValue{}
+	if transfer.CreatedAt != nil {
+		createdAt = transfer.CreatedAt.Format(time.RFC3339)
+	}
+	if transfer.UpdatedAt != nil {
+		updatedAt = transfer.UpdatedAt.Format(time.RFC3339)
+	}
+	if transfer.DeletedAt != nil {
+		deletedAt = &wrapperspb.StringValue{Value: transfer.DeletedAt.Format(time.RFC3339)}
+	}
+
 	return &pb.ApiResponseTransferDeleteAt{
 		Status:  "success",
 		Message: "Successfully restored transfer",
@@ -151,9 +196,9 @@ func (s *transferCommandHandleGrpc) RestoreTransfer(ctx context.Context, request
 			TransferTo:     transfer.TransferTo,
 			TransferAmount: int64(transfer.TransferAmount),
 			TransferTime:   transfer.TransferTime.Format(time.RFC3339),
-			CreatedAt:      convert.FormatTimeRFC3339(transfer.CreatedAt),
-			UpdatedAt:      convert.FormatTimeRFC3339(transfer.UpdatedAt),
-			DeletedAt:      convert.TimeToWrappers(transfer.DeletedAt),
+			CreatedAt:      createdAt,
+			UpdatedAt:      updatedAt,
+			DeletedAt:      deletedAt,
 		},
 	}, nil
 }

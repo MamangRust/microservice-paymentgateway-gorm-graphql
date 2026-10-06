@@ -9,10 +9,10 @@ import (
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
 	pbutils "github.com/MamangRust/microservice-payment-gateway-grpc/pb/common"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	card_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/card_errors/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type cardQueryHandleGrpc struct {
@@ -24,6 +24,13 @@ func NewCardQueryHandleGrpc(cardQuery service.CardQueryService) CardQueryService
 	return &cardQueryHandleGrpc{
 		cardQuery: cardQuery,
 	}
+}
+
+func formatCardTime(tp *time.Time) string {
+	if tp == nil {
+		return ""
+	}
+	return tp.Format(time.RFC3339)
 }
 
 func formatCardTimeTim(t time.Time) string {
@@ -63,8 +70,8 @@ func (s *cardQueryHandleGrpc) FindAllCard(ctx context.Context, req *pb.FindAllCa
 			CardProvider: card.CardProvider,
 			Cvv:          card.Cvv,
 			ExpireDate:   formatCardTimeTim(card.ExpireDate),
-			CreatedAt:    convert.FormatTimeRFC3339(card.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(card.UpdatedAt),
+			CreatedAt:    formatCardTime(card.CreatedAt),
+			UpdatedAt:    formatCardTime(card.UpdatedAt),
 		}
 	}
 
@@ -106,8 +113,8 @@ func (s *cardQueryHandleGrpc) FindByIdCard(ctx context.Context, req *pb.FindById
 			CardProvider: card.CardProvider,
 			Cvv:          card.Cvv,
 			ExpireDate:   formatCardTimeTim(card.ExpireDate),
-			CreatedAt:    convert.FormatTimeRFC3339(card.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(card.UpdatedAt),
+			CreatedAt:    formatCardTime(card.CreatedAt),
+			UpdatedAt:    formatCardTime(card.UpdatedAt),
 		},
 	}, nil
 }
@@ -133,6 +140,10 @@ func (s *cardQueryHandleGrpc) FindByActiveCard(ctx context.Context, req *pb.Find
 
 	protoCards := make([]*pb.CardResponseDeleteAt, len(cards))
 	for i, card := range cards {
+		var deletedAt *wrapperspb.StringValue
+		if card.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: card.DeletedAt.Format(time.RFC3339)}
+		}
 		protoCards[i] = &pb.CardResponseDeleteAt{
 			Id:           int32(card.CardID),
 			UserId:       int32(card.UserID),
@@ -141,9 +152,9 @@ func (s *cardQueryHandleGrpc) FindByActiveCard(ctx context.Context, req *pb.Find
 			CardProvider: card.CardProvider,
 			Cvv:          card.Cvv,
 			ExpireDate:   formatCardTimeTim(card.ExpireDate),
-			CreatedAt:    convert.FormatTimeRFC3339(card.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(card.UpdatedAt),
-			DeletedAt:    convert.TimeToWrappers(card.DeletedAt),
+			CreatedAt:    formatCardTime(card.CreatedAt),
+			UpdatedAt:    formatCardTime(card.UpdatedAt),
+			DeletedAt:    deletedAt,
 		}
 	}
 
@@ -184,6 +195,10 @@ func (s *cardQueryHandleGrpc) FindByTrashedCard(ctx context.Context, req *pb.Fin
 
 	protoCards := make([]*pb.CardResponseDeleteAt, len(cards))
 	for i, card := range cards {
+		var deletedAt *wrapperspb.StringValue
+		if card.DeletedAt != nil {
+			deletedAt = &wrapperspb.StringValue{Value: card.DeletedAt.Format(time.RFC3339)}
+		}
 		protoCards[i] = &pb.CardResponseDeleteAt{
 			Id:           int32(card.CardID),
 			UserId:       int32(card.UserID),
@@ -192,9 +207,9 @@ func (s *cardQueryHandleGrpc) FindByTrashedCard(ctx context.Context, req *pb.Fin
 			CardProvider: card.CardProvider,
 			Cvv:          card.Cvv,
 			ExpireDate:   formatCardTimeTim(card.ExpireDate),
-			CreatedAt:    convert.FormatTimeRFC3339(card.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(card.UpdatedAt),
-			DeletedAt:    convert.TimeToWrappers(card.DeletedAt),
+			CreatedAt:    formatCardTime(card.CreatedAt),
+			UpdatedAt:    formatCardTime(card.UpdatedAt),
+			DeletedAt:    deletedAt,
 		}
 	}
 
@@ -236,8 +251,8 @@ func (s *cardQueryHandleGrpc) FindByCardNumber(ctx context.Context, req *pb.Find
 			CardProvider: res.CardProvider,
 			Cvv:          res.Cvv,
 			ExpireDate:   formatCardTimeTim(res.ExpireDate),
-			CreatedAt:    convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(res.UpdatedAt),
+			CreatedAt:    formatCardTime(res.CreatedAt),
+			UpdatedAt:    formatCardTime(res.UpdatedAt),
 		},
 	}, nil
 }
@@ -263,8 +278,8 @@ func (s *cardQueryHandleGrpc) FindByUserIdCard(ctx context.Context, req *pb.Find
 			CardProvider: res.CardProvider,
 			Cvv:          res.Cvv,
 			ExpireDate:   formatCardTimeTim(res.ExpireDate),
-			CreatedAt:    convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(res.UpdatedAt),
+			CreatedAt:    formatCardTime(res.CreatedAt),
+			UpdatedAt:    formatCardTime(res.UpdatedAt),
 		},
 	}, nil
 }
@@ -287,7 +302,8 @@ func (s *cardQueryHandleGrpc) FindUserCardByCardNumber(ctx context.Context, req 
 		CardType:     res.CardType,
 		Cvv:          res.Cvv,
 		CardProvider: res.CardProvider,
-		ExpireDate:   formatCardTimeTim(res.ExpireDate),			CreatedAt:    convert.FormatTimeRFC3339(res.CreatedAt),
-			UpdatedAt:    convert.FormatTimeRFC3339(res.UpdatedAt),
+		ExpireDate:   formatCardTimeTim(res.ExpireDate),
+		CreatedAt:    formatCardTime(res.CreatedAt),
+		UpdatedAt:    formatCardTime(res.UpdatedAt),
 	}, nil
 }

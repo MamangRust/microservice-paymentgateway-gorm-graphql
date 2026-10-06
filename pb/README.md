@@ -1,1 +1,0 @@
-## Hasil Generate dari Proto

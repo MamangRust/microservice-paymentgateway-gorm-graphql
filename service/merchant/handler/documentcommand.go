@@ -5,11 +5,11 @@ import (
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/service"
 	pbdocument "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant_document"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/convert"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 	merchantdocument_errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors/merchant_document_errors/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type merchantDocumentCommandHandleGrpc struct {
@@ -44,8 +44,8 @@ func (s *merchantDocumentCommandHandleGrpc) Create(ctx context.Context, req *pbd
 		DocumentUrl:  document.DocumentUrl,
 		Status:       document.Status,
 		Note:         StringValue(document.Note),
-		UploadedAt:   convert.FormatTimeRFC3339(document.UploadedAt),
-		UpdatedAt:    convert.FormatTimeRFC3339(document.UpdatedAt),
+		UploadedAt:   formatDocTimePtr(document.UploadedAt),
+		UpdatedAt:    formatDocTimePtr(document.UpdatedAt),
 	}
 
 	return &pbdocument.ApiResponseMerchantDocument{
@@ -87,8 +87,8 @@ func (s *merchantDocumentCommandHandleGrpc) Update(ctx context.Context, req *pbd
 		DocumentUrl:  document.DocumentUrl,
 		Status:       document.Status,
 		Note:         StringValue(document.Note),
-		UploadedAt:   convert.FormatTimeRFC3339(document.UploadedAt),
-		UpdatedAt:    convert.FormatTimeRFC3339(document.UpdatedAt),
+		UploadedAt:   formatDocTimePtr(document.UploadedAt),
+		UpdatedAt:    formatDocTimePtr(document.UpdatedAt),
 	}
 
 	return &pbdocument.ApiResponseMerchantDocument{
@@ -128,8 +128,8 @@ func (s *merchantDocumentCommandHandleGrpc) UpdateStatus(ctx context.Context, re
 		DocumentUrl:  document.DocumentUrl,
 		Status:       document.Status,
 		Note:         StringValue(document.Note),
-		UploadedAt:   convert.FormatTimeRFC3339(document.UploadedAt),
-		UpdatedAt:    convert.FormatTimeRFC3339(document.UpdatedAt),
+		UploadedAt:   formatDocTimePtr(document.UploadedAt),
+		UpdatedAt:    formatDocTimePtr(document.UpdatedAt),
 	}
 
 	return &pbdocument.ApiResponseMerchantDocument{
@@ -158,9 +158,9 @@ func (s *merchantDocumentCommandHandleGrpc) Trashed(ctx context.Context, req *pb
 		DocumentUrl:  document.DocumentUrl,
 		Status:       document.Status,
 		Note:         StringValue(document.Note),
-		UploadedAt:   convert.FormatTimeRFC3339(document.UploadedAt),
-		UpdatedAt:    convert.FormatTimeRFC3339(document.UpdatedAt),
-		DeletedAt:    convert.TimeToWrappers(document.DeletedAt),
+		UploadedAt:   formatDocTimePtr(document.UploadedAt),
+		UpdatedAt:    formatDocTimePtr(document.UpdatedAt),
+		DeletedAt:    &wrapperspb.StringValue{Value: formatDocTimePtr(document.DeletedAt)},
 	}
 
 	return &pbdocument.ApiResponseMerchantDocumentDeleteAt{
@@ -189,8 +189,8 @@ func (s *merchantDocumentCommandHandleGrpc) Restore(ctx context.Context, req *pb
 		DocumentUrl:  document.DocumentUrl,
 		Status:       document.Status,
 		Note:         StringValue(document.Note),
-		UploadedAt:   convert.FormatTimeRFC3339(document.UploadedAt),
-		UpdatedAt:    convert.FormatTimeRFC3339(document.UpdatedAt),
+		UploadedAt:   formatDocTimePtr(document.UploadedAt),
+		UpdatedAt:    formatDocTimePtr(document.UpdatedAt),
 	}
 
 	return &pbdocument.ApiResponseMerchantDocumentDeleteAt{
