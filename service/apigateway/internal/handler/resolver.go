@@ -33,22 +33,23 @@ import (
 	withdraw_cache "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/redis/api/withdraw"
 	authpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb"
 	cardpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
-	cardstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card/stats"
+	cardstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/card"
 	merchantpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	merchantstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant/stats"
+	merchantstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/merchant"
 	merchantdocumentpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant_document"
 	rolepb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/role"
 	saldopb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	saldostatspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
+	saldostatspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/saldo"
 	topuppb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup"
-	topupstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/topup/stats"
+	topupstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/topup"
 	transactionpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction"
-	transactionstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transaction/stats"
+	transactionstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/transaction"
 	transferpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
-	transferstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer/stats"
+	transferstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/transfer"
 	userpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/user"
+	userrolepb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/user_role"
 	withdrawpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
-	withdrawstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw/stats"
+	withdrawstatpb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/withdraw"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/kafka"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
@@ -85,6 +86,7 @@ type UserClient struct {
 type RoleClient struct {
 	RoleQueryClient   rolepb.RoleQueryServiceClient
 	RoleCommandClient rolepb.RoleCommandServiceClient
+	UserRole          userrolepb.UserRoleServiceClient
 }
 
 type CardClient struct {
@@ -287,6 +289,7 @@ func NewResolver(
 			RoleClient: RoleClient{
 				RoleQueryClient:   rolepb.NewRoleQueryServiceClient(deps.Clients.RoleClient),
 				RoleCommandClient: rolepb.NewRoleCommandServiceClient(deps.Clients.RoleClient),
+				UserRole:          userrolepb.NewUserRoleServiceClient(deps.Clients.RoleClient),
 			},
 			Kafka:      deps.Kafka,
 			Logger:     deps.Logger,

@@ -4,7 +4,7 @@ import (
 	graphqlmapper "github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/mapper"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/model"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/saldo"
 )
 
 type saldoGraphqlMapper struct {

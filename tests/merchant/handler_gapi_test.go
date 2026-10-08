@@ -7,7 +7,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/merchant/stats"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/merchant"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/handler"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/repository"
@@ -87,9 +87,9 @@ func (s *MerchantGapiTestSuite) SetupSuite() {
 	server := grpc.NewServer()
 	pb.RegisterMerchantCommandServiceServer(server, merchantHandler)
 	pb.RegisterMerchantQueryServiceServer(server, merchantHandler)
-	statspb.RegisterMerchantStatsAmountServiceServer(server, merchantStatsHandler)
-	statspb.RegisterMerchantStatsMethodServiceServer(server, merchantStatsHandler)
-	statspb.RegisterMerchantStatsTotalAmountServiceServer(server, merchantStatsHandler)
+	pbStats.RegisterMerchantStatsAmountServiceServer(server, merchantStatsHandler)
+	pbStats.RegisterMerchantStatsMethodServiceServer(server, merchantStatsHandler)
+	pbStats.RegisterMerchantStatsTotalAmountServiceServer(server, merchantStatsHandler)
 	pb.RegisterMerchantTransactionServiceServer(server, merchantStatsHandler)
 	s.grpcServer = server
 	lis, err := net.Listen("tcp", ":0")
@@ -106,7 +106,9 @@ func (s *MerchantGapiTestSuite) TearDownSuite() {
 	s.conn.Close()
 	s.grpcServer.Stop()
 	s.redisClient.Close()
-	if s.chConn != nil { s.chConn.Close() }
+	if s.chConn != nil {
+		s.chConn.Close()
+	}
 	s.ts.Teardown()
 }
 
@@ -135,6 +137,8 @@ func (s *MerchantGapiTestSuite) Test10_BulkOperations() {
 }
 
 func TestMerchantGapiSuite(t *testing.T) {
-	if testing.Short() { t.Skip("skipping integration test") }
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 	suite.Run(t, new(MerchantGapiTestSuite))
 }

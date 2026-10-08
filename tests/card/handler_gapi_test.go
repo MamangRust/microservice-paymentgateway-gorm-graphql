@@ -8,7 +8,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/card/stats"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/card"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/card/handler"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
@@ -41,11 +41,11 @@ type CardGapiTestSuite struct {
 	chConn            clickhouse.Conn
 	queryClient       pb.CardQueryServiceClient
 	cmdClient         pb.CardCommandServiceClient
-	statsClient       statspb.CardStatsTopupServiceClient
-	balanceClient     statspb.CardStatsBalanceServiceClient
-	transactionClient statspb.CardStatsTransactionServiceClient
-	transferClient    statspb.CardStatsTransferServiceClient
-	withdrawClient    statspb.CardStatsWithdrawServiceClient
+	statsClient       pbStats.CardStatsTopupServiceClient
+	balanceClient     pbStats.CardStatsBalanceServiceClient
+	transactionClient pbStats.CardStatsTransactionServiceClient
+	transferClient    pbStats.CardStatsTransferServiceClient
+	withdrawClient    pbStats.CardStatsWithdrawServiceClient
 	userID            int
 	cardID            int
 }
@@ -85,7 +85,7 @@ func (s *CardGapiTestSuite) SetupSuite() {
 	}
 
 	repos := repository.NewRepositories(gormDB, nil)
-	userRepo := user_repo.NewRepositories(gormDB)
+	userRepo := user_repo.NewRepositories(&user_repo.Deps{Db: gormDB, RoleQueryClient: s.ts.RoleQueryClient, UserRoleClient: s.ts.UserRoleClient})
 
 	logger.ResetInstance()
 	lp := sdklog.NewLoggerProvider()
@@ -108,11 +108,11 @@ func (s *CardGapiTestSuite) SetupSuite() {
 	server := grpc.NewServer()
 	pb.RegisterCardQueryServiceServer(server, cardHandler)
 	pb.RegisterCardCommandServiceServer(server, cardHandler)
-	statspb.RegisterCardStatsTopupServiceServer(server, cardStatsHandler)
-	statspb.RegisterCardStatsBalanceServiceServer(server, cardStatsHandler)
-	statspb.RegisterCardStatsTransactionServiceServer(server, cardStatsHandler)
-	statspb.RegisterCardStatsTransferServiceServer(server, cardStatsHandler)
-	statspb.RegisterCardStatsWithdrawServiceServer(server, cardStatsHandler)
+	pbStats.RegisterCardStatsTopupServiceServer(server, cardStatsHandler)
+	pbStats.RegisterCardStatsBalanceServiceServer(server, cardStatsHandler)
+	pbStats.RegisterCardStatsTransactionServiceServer(server, cardStatsHandler)
+	pbStats.RegisterCardStatsTransferServiceServer(server, cardStatsHandler)
+	pbStats.RegisterCardStatsWithdrawServiceServer(server, cardStatsHandler)
 	s.grpcServer = server
 
 	lis, err := net.Listen("tcp", "localhost:0")
@@ -124,13 +124,13 @@ func (s *CardGapiTestSuite) SetupSuite() {
 	s.conn = conn
 	s.queryClient = pb.NewCardQueryServiceClient(conn)
 	s.cmdClient = pb.NewCardCommandServiceClient(conn)
-	s.statsClient = statspb.NewCardStatsTopupServiceClient(conn)
-	s.balanceClient = statspb.NewCardStatsBalanceServiceClient(conn)
-	s.transactionClient = statspb.NewCardStatsTransactionServiceClient(conn)
-	s.transferClient = statspb.NewCardStatsTransferServiceClient(conn)
-	s.withdrawClient = statspb.NewCardStatsWithdrawServiceClient(conn)
+	s.statsClient = pbStats.NewCardStatsTopupServiceClient(conn)
+	s.balanceClient = pbStats.NewCardStatsBalanceServiceClient(conn)
+	s.transactionClient = pbStats.NewCardStatsTransactionServiceClient(conn)
+	s.transferClient = pbStats.NewCardStatsTransferServiceClient(conn)
+	s.withdrawClient = pbStats.NewCardStatsWithdrawServiceClient(conn)
 
-	user, err := userRepo.UserCommand().CreateUser(context.Background(), &requests.CreateUserRequest{
+	user, err := userRepo.UserCommand.CreateUser(context.Background(), &requests.CreateUserRequest{
 		FirstName: "Gapi",
 		LastName:  "Card",
 		Email:     "gapi.card@example.com",
@@ -253,10 +253,10 @@ func (s *CardGapiTestSuite) Test11_CardStats_Balance_Full() {
 	cardNumber := "1234567890"
 	_ = s.chConn.Exec(ctx, "TRUNCATE TABLE saldo_events")
 	_ = s.chConn.Exec(ctx, `INSERT INTO saldo_events (card_number, total_balance, created_at) VALUES (?, ?, ?)`, cardNumber, 10000, now)
-	respM, err := s.balanceClient.FindMonthlyBalance(ctx, &statspb.FindYearBalance{Year: int32(now.Year())})
+	respM, err := s.balanceClient.FindMonthlyBalance(ctx, &pbStats.FindYearBalance{Year: int32(now.Year())})
 	s.Require().NoError(err)
 	s.Equal("success", respM.Status)
-	respY, err := s.balanceClient.FindYearlyBalance(ctx, &statspb.FindYearBalance{Year: int32(now.Year())})
+	respY, err := s.balanceClient.FindYearlyBalance(ctx, &pbStats.FindYearBalance{Year: int32(now.Year())})
 	s.Require().NoError(err)
 	s.Equal("success", respY.Status)
 }

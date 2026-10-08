@@ -8,8 +8,9 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pbAISecurity "github.com/MamangRust/microservice-payment-gateway-grpc/pb/ai_security"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/transfer"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/transfer/stats"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/adapter"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	saldo_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/repository"
@@ -39,8 +40,8 @@ type TransferGapiTestSuite struct {
 	grpcServer    *grpc.Server
 	commandClient pb.TransferCommandServiceClient
 	queryClient   pb.TransferQueryServiceClient
-	statsClient   statspb.TransferStatsAmountServiceClient
-	statusClient  statspb.TransferStatsStatusServiceClient
+	statsClient   pbStats.TransferStatsAmountServiceClient
+	statusClient  pbStats.TransferStatsStatusServiceClient
 	conn          *grpc.ClientConn
 	repos         repository.Repositories
 	userRepo      user_repo.UserCommandRepository
@@ -86,10 +87,10 @@ func (s *TransferGapiTestSuite) SetupSuite() {
 	// Repositories for seeding
 	s.userRepo = user_repo.NewUserCommandRepository(gormDB)
 	s.cardRepo = card_repo.NewRepositories(gormDB, nil)
-	s.saldoRepo = saldo_repo.NewRepositories(gormDB, nil)
+	s.saldoRepo = saldo_repo.NewRepositories(gormDB, nil, nil)
 
 	// Transfer repos
-	s.repos = repository.NewRepositories(gormDB, s.saldoRepo, s.cardRepo.CardQuery)
+	s.repos = repository.NewRepositories(gormDB, nil, nil, nil, nil)
 
 	opts, err := redis.ParseURL(s.ts.RedisURL)
 	s.Require().NoError(err)
@@ -112,13 +113,13 @@ func (s *TransferGapiTestSuite) SetupSuite() {
 	aiSecurityClient := pbAISecurity.NewAISecurityServiceClient(conn)
 
 	transferService := service.NewService(&service.Deps{
-		Kafka:            nil,
-		Repositories:     s.repos,
-		CardAdapter:      s.ts.CardAdapter,
-		SaldoAdapter:     s.ts.SaldoAdapter,
-		Logger:           log,
-		Cache:            cacheStore,
-		AISecurityClient: aiSecurityClient,
+		Kafka:             nil,
+		Repositories:      s.repos,
+		CardAdapter:       s.ts.CardAdapter,
+		SaldoAdapter:      s.ts.SaldoAdapter,
+		Logger:            log,
+		Cache:             cacheStore,
+		AISecurityAdapter: adapter.NewAISecurityAdapter(aiSecurityClient),
 	})
 
 	transferHandlerGapi := handler.NewHandler(transferService)
@@ -130,8 +131,8 @@ func (s *TransferGapiTestSuite) SetupSuite() {
 	server := grpc.NewServer()
 	pb.RegisterTransferCommandServiceServer(server, transferHandlerGapi)
 	pb.RegisterTransferQueryServiceServer(server, transferHandlerGapi)
-	statspb.RegisterTransferStatsAmountServiceServer(server, transferStatsHandler)
-	statspb.RegisterTransferStatsStatusServiceServer(server, transferStatsHandler)
+	pbStats.RegisterTransferStatsAmountServiceServer(server, transferStatsHandler)
+	pbStats.RegisterTransferStatsStatusServiceServer(server, transferStatsHandler)
 	pbAISecurity.RegisterAISecurityServiceServer(server, &mockAISecurityServer{})
 	s.grpcServer = server
 
@@ -139,8 +140,8 @@ func (s *TransferGapiTestSuite) SetupSuite() {
 
 	s.commandClient = pb.NewTransferCommandServiceClient(conn)
 	s.queryClient = pb.NewTransferQueryServiceClient(conn)
-	s.statsClient = statspb.NewTransferStatsAmountServiceClient(conn)
-	s.statusClient = statspb.NewTransferStatsStatusServiceClient(conn)
+	s.statsClient = pbStats.NewTransferStatsAmountServiceClient(conn)
+	s.statusClient = pbStats.NewTransferStatsStatusServiceClient(conn)
 
 	// Seed Sender
 	sender, err := s.userRepo.CreateUser(context.Background(), &requests.CreateUserRequest{

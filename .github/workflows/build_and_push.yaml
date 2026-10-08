@@ -40,7 +40,7 @@ jobs:
         uses: extractions/setup-just@v2
 
       # Pin the exact tool versions that produced the committed generated code
-      # (see headers in pb/*.pb.go and pkg/database/schema/*.sql.go).
+      # (see headers in pb/*.pb.go).
       - name: Install pinned protoc (3.21.12)
         run: |
           curl -fsSL -o /tmp/protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.21.12/protoc-3.21.12-linux-x86_64.zip
@@ -52,12 +52,10 @@ jobs:
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.11
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
 
-      - name: Install pinned sqlc (1.30.0)
+      - name: Check proto code has no drift
         run: |
-          go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.30.0
-
-      - name: Check generated code has no drift
-        run: just generate-check
+          just generate-proto
+          git diff --exit-code -- pb/
 
   docker:
     needs: [validate, generated-drift]

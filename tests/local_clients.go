@@ -5,6 +5,7 @@ import (
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/role"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/user"
+	userrole "github.com/MamangRust/microservice-payment-gateway-grpc/pb/user_role"
 	role_handler "github.com/MamangRust/microservice-payment-gateway-grpc/service/role/handler"
 	user_handler "github.com/MamangRust/microservice-payment-gateway-grpc/service/user/handler"
 	"google.golang.org/grpc"
@@ -101,14 +102,6 @@ func (c *LocalRoleClient) DeleteRolePermanent(ctx context.Context, in *role.Find
 	return c.Handler.RoleCommand.DeleteRolePermanent(ctx, in)
 }
 
-func (c *LocalRoleClient) CreateUserRole(ctx context.Context, in *role.CreateUserRoleRequest, opts ...grpc.CallOption) (*role.ApiResponseRole, error) {
-	return c.Handler.RoleCommand.CreateUserRole(ctx, in)
-}
-
-func (c *LocalRoleClient) DeleteUserRole(ctx context.Context, in *role.DeleteUserRoleRequest, opts ...grpc.CallOption) (*role.ApiResponseRole, error) {
-	return c.Handler.RoleCommand.DeleteUserRole(ctx, in)
-}
-
 func (c *LocalRoleClient) TrashedRole(ctx context.Context, in *role.FindByIdRoleRequest, opts ...grpc.CallOption) (*role.ApiResponseRoleDeleteAt, error) {
 	return c.Handler.RoleCommand.TrashedRole(ctx, in)
 }
@@ -125,10 +118,6 @@ func (c *LocalRoleClient) DeleteAllRolePermanent(ctx context.Context, in *emptyp
 	return c.Handler.RoleCommand.DeleteAllRolePermanent(ctx, in)
 }
 
-func (c *LocalRoleClient) FindByUserId(ctx context.Context, in *role.FindByIdUserRoleRequest, opts ...grpc.CallOption) (*role.ApiResponsesRole, error) {
-	return c.Handler.RoleQuery.FindByUserId(ctx, in)
-}
-
 func (c *LocalRoleClient) FindByActive(ctx context.Context, in *role.FindAllRoleRequest, opts ...grpc.CallOption) (*role.ApiResponsePaginationRoleDeleteAt, error) {
 	return c.Handler.RoleQuery.FindByActive(ctx, in)
 }
@@ -139,4 +128,22 @@ func (c *LocalRoleClient) FindByTrashed(ctx context.Context, in *role.FindAllRol
 
 func (c *LocalRoleClient) FindByNameRole(ctx context.Context, in *role.FindByNameRoleRequest, opts ...grpc.CallOption) (*role.ApiResponseRole, error) {
 	return c.Handler.RoleQuery.FindByNameRole(ctx, in)
+}
+
+// LocalUserRoleClient implements UserRoleServiceClient by delegating to the
+// in-process role service handler.
+type LocalUserRoleClient struct {
+	Handler *role_handler.Handler
+}
+
+func (c *LocalUserRoleClient) CreateUserRole(ctx context.Context, in *userrole.CreateUserRoleRequest, opts ...grpc.CallOption) (*role.ApiResponseRole, error) {
+	return c.Handler.UserRole.CreateUserRole(ctx, in)
+}
+
+func (c *LocalUserRoleClient) DeleteUserRole(ctx context.Context, in *userrole.DeleteUserRoleRequest, opts ...grpc.CallOption) (*role.ApiResponseRole, error) {
+	return c.Handler.UserRole.DeleteUserRole(ctx, in)
+}
+
+func (c *LocalUserRoleClient) FindByUserId(ctx context.Context, in *userrole.FindByIdUserRoleRequest, opts ...grpc.CallOption) (*role.ApiResponsesRole, error) {
+	return c.Handler.UserRole.FindByUserId(ctx, in)
 }

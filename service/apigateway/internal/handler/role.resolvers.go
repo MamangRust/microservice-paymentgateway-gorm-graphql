@@ -9,6 +9,7 @@ import (
 	errors "github.com/MamangRust/microservice-payment-gateway-grpc/shared/errors"
 
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/role"
+	userrolepb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/user_role"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/apigateway/internal/model"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/shared/domain/requests"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -380,7 +381,7 @@ func (r *queryResolver) FindByUserIDRole(ctx context.Context, input model.FindBy
 			return cachedData, nil
 		}
 
-		res, err := r.RoleGraphql.RoleClient.RoleQueryClient.FindByUserId(ctx, &pb.FindByIdUserRoleRequest{
+		res, err := r.RoleGraphql.RoleClient.UserRole.FindByUserId(ctx, &userrolepb.FindByIdUserRoleRequest{
 			UserId: int32(userId),
 		})
 		if err != nil {

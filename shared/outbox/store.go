@@ -3,8 +3,8 @@ package outbox
 import "context"
 
 // Store is the shared outbox interface used by services to enqueue events.
-// R is the service's own generated OutboxRecord type (each owning service has
-// an identical outbox_events table); the publisher reads from the same table
+// R is the service's own outbox record type (each owning service has an
+// identical outbox_events table); the publisher reads from the same table
 // and publishes to Kafka.
 type Store[R any] interface {
 	// Insert enqueues a single event into the outbox. The event will be
@@ -13,7 +13,7 @@ type Store[R any] interface {
 }
 
 // NewStore creates a Store backed by an insert function bound to the service's
-// own generated queries, e.g. outbox.NewStore(db.InsertOutbox).
+// own GORM-based outbox store (see service/*/repository/outboxGormStore.go).
 func NewStore[R any](insert func(context.Context, R) error) Store[R] {
 	return &store[R]{insert: insert}
 }

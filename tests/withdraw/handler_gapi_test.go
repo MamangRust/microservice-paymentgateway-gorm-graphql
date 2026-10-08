@@ -8,8 +8,9 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pbAISecurity "github.com/MamangRust/microservice-payment-gateway-grpc/pb/ai_security"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/withdraw"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/withdraw/stats"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/adapter"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	saldo_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/repository"
@@ -41,8 +42,8 @@ type WithdrawGapiTestSuite struct {
 	grpcServer    *grpc.Server
 	commandClient pb.WithdrawCommandServiceClient
 	queryClient   pb.WithdrawQueryServiceClient
-	statsClient   statspb.WithdrawStatsAmountServiceClient
-	statusClient  statspb.WithdrawStatsStatusServiceClient
+	statsClient   pbStats.WithdrawStatsAmountServiceClient
+	statusClient  pbStats.WithdrawStatsStatusServiceClient
 	conn          *grpc.ClientConn
 	repos         repository.Repositories
 	userRepo      user_repo.UserCommandRepository
@@ -92,13 +93,13 @@ func (s *WithdrawGapiTestSuite) SetupSuite() {
 	// Repositories for seeding and service dependencies
 	userRepos := user_repo.NewUserCommandRepository(gormDB)
 	cardRepos := card_repo.NewRepositories(gormDB, nil)
-	saldoRepos := saldo_repo.NewRepositories(gormDB, nil)
+	saldoRepos := saldo_repo.NewRepositories(gormDB, nil, nil)
 
 	s.userRepo = userRepos
 	s.cardRepo = cardRepos.CardCommand
 	s.saldoRepo = saldoRepos
 
-	s.repos = repository.NewRepositories(gormDB, cardRepos.CardQuery, saldoRepos)
+	s.repos = repository.NewRepositories(gormDB, nil, nil, nil, nil)
 
 	logger.ResetInstance()
 	lp := sdklog.NewLoggerProvider()
@@ -128,13 +129,13 @@ func (s *WithdrawGapiTestSuite) SetupSuite() {
 	})
 
 	withdrawService := service.NewService(&service.Deps{
-		Kafka:            nil,
-		Repositories:     s.repos,
-		CardAdapter:      s.ts.CardAdapter,
-		SaldoAdapter:     s.ts.SaldoAdapter,
-		Logger:           log,
-		Cache:            cacheStore,
-		AISecurityClient: aiSecurityClient,
+		Kafka:             nil,
+		Repositories:      s.repos,
+		CardAdapter:       s.ts.CardAdapter,
+		SaldoAdapter:      s.ts.SaldoAdapter,
+		Logger:            log,
+		Cache:             cacheStore,
+		AISecurityAdapter: adapter.NewAISecurityAdapter(aiSecurityClient),
 	})
 
 	withdrawHandler := handler.NewHandler(withdrawService)
@@ -146,8 +147,8 @@ func (s *WithdrawGapiTestSuite) SetupSuite() {
 	server := grpc.NewServer()
 	pb.RegisterWithdrawCommandServiceServer(server, withdrawHandler)
 	pb.RegisterWithdrawQueryServiceServer(server, withdrawHandler)
-	statspb.RegisterWithdrawStatsAmountServiceServer(server, withdrawStatsHandler)
-	statspb.RegisterWithdrawStatsStatusServiceServer(server, withdrawStatsHandler)
+	pbStats.RegisterWithdrawStatsAmountServiceServer(server, withdrawStatsHandler)
+	pbStats.RegisterWithdrawStatsStatusServiceServer(server, withdrawStatsHandler)
 	pbAISecurity.RegisterAISecurityServiceServer(server, &mockAISecurityServer{})
 	s.grpcServer = server
 
@@ -155,8 +156,8 @@ func (s *WithdrawGapiTestSuite) SetupSuite() {
 
 	s.commandClient = pb.NewWithdrawCommandServiceClient(conn)
 	s.queryClient = pb.NewWithdrawQueryServiceClient(conn)
-	s.statsClient = statspb.NewWithdrawStatsAmountServiceClient(conn)
-	s.statusClient = statspb.NewWithdrawStatsStatusServiceClient(conn)
+	s.statsClient = pbStats.NewWithdrawStatsAmountServiceClient(conn)
+	s.statusClient = pbStats.NewWithdrawStatsStatusServiceClient(conn)
 }
 
 func (s *WithdrawGapiTestSuite) TearDownSuite() {

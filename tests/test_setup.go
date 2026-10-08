@@ -18,17 +18,18 @@ import (
 
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/role"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pb/user"
+	userrole "github.com/MamangRust/microservice-payment-gateway-grpc/pb/user_role"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/adapter"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/auth"
-	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/hash"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/database/models"
+	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/hash"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	merchant_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/merchant/repository"
-	saldo_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/repository"
 	role_handler "github.com/MamangRust/microservice-payment-gateway-grpc/service/role/handler"
 	role_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/role/repository"
 	role_service "github.com/MamangRust/microservice-payment-gateway-grpc/service/role/service"
+	saldo_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/repository"
 	user_handler "github.com/MamangRust/microservice-payment-gateway-grpc/service/user/handler"
 	user_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/user/repository"
 	user_service "github.com/MamangRust/microservice-payment-gateway-grpc/service/user/service"
@@ -63,10 +64,12 @@ type TestSuite struct {
 	UserCommandClient user.UserCommandServiceClient
 	RoleQueryClient   role.RoleQueryServiceClient
 	RoleCommandClient role.RoleCommandServiceClient
+	UserRoleClient    userrole.UserRoleServiceClient
 
 	// Aliases for convenience
-	UserClient *LocalUserClient
-	RoleClient *LocalRoleClient
+	UserClient    *LocalUserClient
+	RoleClient    *LocalRoleClient
+	UserRoleLocal *LocalUserRoleClient
 
 	// Shared resources
 	Logger        logger.LoggerInterface
@@ -167,8 +170,29 @@ func SetupTestSuite() (*TestSuite, error) {
 	ts.Hashing = hash.NewHashingPassword()
 	ts.TokenManager, _ = auth.NewManager("test-secret-key")
 
-	// Setup repositories with GORM
-	userRepos := user_repo.NewRepositories(gormDB)
+	// Setup repositories with GORM.
+	// The role handler is built first so the user service can consume it
+	// through the role gRPC adapter instead of touching the roles table.
+	roleRepos := role_repo.NewRepositories(gormDB)
+	roleService := role_service.NewService(&role_service.Deps{
+		Repositories: roleRepos,
+		Logger:       ts.Logger,
+		Cache:        ts.CacheStore,
+	})
+	roleHandler := role_handler.NewHandler(roleService)
+	rClient := &LocalRoleClient{Handler: roleHandler}
+	urClient := &LocalUserRoleClient{Handler: roleHandler}
+	ts.RoleQueryClient = rClient
+	ts.RoleCommandClient = rClient
+	ts.UserRoleClient = urClient
+	ts.RoleClient = rClient
+	ts.UserRoleLocal = urClient
+
+	userRepos := user_repo.NewRepositories(&user_repo.Deps{
+		Db:              gormDB,
+		RoleQueryClient: rClient,
+		UserRoleClient:  urClient,
+	})
 	userService := user_service.NewService(&user_service.Deps{
 		Repositories: userRepos,
 		Hash:         ts.Hashing,
@@ -180,19 +204,7 @@ func SetupTestSuite() (*TestSuite, error) {
 	ts.UserQueryClient = uClient
 	ts.UserCommandClient = uClient
 
-	roleRepos := role_repo.NewRepositories(gormDB)
-	roleService := role_service.NewService(&role_service.Deps{
-		Repositories: roleRepos,
-		Logger:       ts.Logger,
-		Cache:        ts.CacheStore,
-	})
-	roleHandler := role_handler.NewHandler(roleService)
-	rClient := &LocalRoleClient{Handler: roleHandler}
-	ts.RoleQueryClient = rClient
-	ts.RoleCommandClient = rClient
-
 	ts.UserClient = uClient
-	ts.RoleClient = rClient
 
 	// Initialize Logging, Cache and Observability
 	logger.ResetInstance()
@@ -209,16 +221,16 @@ func SetupTestSuite() (*TestSuite, error) {
 	ts.Observability, _ = observability.NewObservability("test-integration", ts.Logger)
 
 	// Initialize adapters (for cross-service tests)
-	ts.UserAdapter = adapter.NewLocalUserAdapter(userRepos.UserQuery())
+	ts.UserAdapter = newLocalUserAdapter(userRepos.UserQuery)
 
-	cardRepos := card_repo.NewRepositories(gormDB, nil)
-	ts.CardAdapter = adapter.NewLocalCardAdapter(cardRepos.CardQuery, cardRepos.CardCommand)
+	cardRepos := card_repo.NewRepositories(gormDB, uClient)
+	ts.CardAdapter = newLocalCardAdapter(cardRepos.CardQuery, cardRepos.CardCommand)
 
-	saldoRepos := saldo_repo.NewRepositories(gormDB, nil)
-	ts.SaldoAdapter = adapter.NewLocalSaldoAdapter(saldoRepos)
+	saldoRepos := saldo_repo.NewRepositories(gormDB, nil, nil)
+	ts.SaldoAdapter = newLocalSaldoAdapter(saldoRepos)
 
-	merchantRepos := merchant_repo.NewRepositories(gormDB, nil)
-	ts.MerchantAdapter = adapter.NewLocalMerchantAdapter(merchantRepos)
+	merchantRepos := merchant_repo.NewRepositories(gormDB, uClient)
+	ts.MerchantAdapter = newLocalMerchantAdapter(merchantRepos)
 
 	// Re-initialize services with cache now available
 	userService = user_service.NewService(&user_service.Deps{
@@ -239,11 +251,14 @@ func SetupTestSuite() (*TestSuite, error) {
 	})
 	roleHandler = role_handler.NewHandler(roleService)
 	rClient = &LocalRoleClient{Handler: roleHandler}
+	urClient = &LocalUserRoleClient{Handler: roleHandler}
 	ts.RoleQueryClient = rClient
 	ts.RoleCommandClient = rClient
+	ts.UserRoleClient = urClient
 
 	ts.UserClient = uClient
 	ts.RoleClient = rClient
+	ts.UserRoleLocal = urClient
 
 	return ts, nil
 }
@@ -308,25 +323,13 @@ func (ts *TestSuite) RunAllMigrations(root string, relPaths []string) error {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	// Number files starting after the highest version already applied to this
-	// database. Renumbering every call from 0001 makes consecutive
-	// RunMigrations calls collide: goose treats already-applied versions as
-	// done and jumps straight to the later ones, so migrations can run before
-	// their dependencies (e.g. create_reset_token before create_users).
-	currentVersion, err := goose.EnsureDBVersion(db)
-	if err != nil {
-		return fmt.Errorf("failed to read current migration version: %w", err)
-	}
-
 	for i, src := range allFiles {
-		// Goose requires monotonically increasing version numbers within a
-		// migration directory, so use a zero-padded index offset past any
-		// versions already recorded on this database.
+		// Goose requires sequential version numbering, so use zero-padded index
 		data, err := os.ReadFile(src)
 		if err != nil {
 			return fmt.Errorf("failed to read %s: %w", src, err)
 		}
-		destName := fmt.Sprintf("%04d_%s", currentVersion+int64(i)+1, filepath.Base(src))
+		destName := fmt.Sprintf("%04d_%s", i+1, filepath.Base(src))
 		if err := os.WriteFile(filepath.Join(tmpDir, destName), data, 0644); err != nil {
 			return fmt.Errorf("failed to write %s: %w", destName, err)
 		}

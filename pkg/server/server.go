@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
 	"os/signal"
 	"strings"
@@ -25,19 +24,16 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
+	"gorm.io/gorm"
 )
 
 type GRPCServer struct {
 	Logger logger.LoggerInterface
-	// Pool is the underlying pgx pool. Services build their own generated
-	// per-service db.Queries from it (database/schema is per-service).
-	Pool             *pgxpool.Pool
 	// GormDB is the GORM database client. Services use this for repository
 	// implementations after migrating from sqlc to GORM.
 	GormDB           *gorm.DB
@@ -74,18 +70,13 @@ func New(cfg *Config) (*GRPCServer, error) {
 		return nil, fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
-	dbConn, err := database.NewClientWithPrefix(l, cfg.DBCluster)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database cluster %s: %w", cfg.DBCluster, err)
-	}
-
 	gormDB, err := database.NewGormClientWithPrefix(l, cfg.DBCluster)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database via GORM cluster %s: %w", cfg.DBCluster, err)
 	}
 
 	if cfg.MigrationPath != "" {
-		if err := database.RunMigrations(l, cfg.MigrationPath); err != nil {
+		if err := database.RunMigrations(l, cfg.DBCluster, cfg.MigrationPath); err != nil {
 			return nil, fmt.Errorf("failed to run migrations: %w", err)
 		}
 	}
@@ -102,7 +93,6 @@ func New(cfg *Config) (*GRPCServer, error) {
 
 	return &GRPCServer{
 		Logger:     l,
-		Pool:       dbConn,
 		GormDB:     gormDB,
 		Ctx:        ctx,
 		Cancel:     cancel,
@@ -248,17 +238,17 @@ func (s *GRPCServer) Cleanup() {
 
 	if s.Redis != nil {
 		if err := s.Redis.Close(); err != nil {
-		s.Logger.Error("Failed to close Redis connection", zap.Error(err))
+			s.Logger.Error("Failed to close Redis connection", zap.Error(err))
 		} else {
-		s.Logger.Info("Redis connection closed")
+			s.Logger.Info("Redis connection closed")
 		}
 	}
 
 	if s.Telemetry != nil {
 		if err := s.Telemetry.Shutdown(context.Background()); err != nil {
-		s.Logger.Error("Failed to shutdown telemetry", zap.Error(err))
+			s.Logger.Error("Failed to shutdown telemetry", zap.Error(err))
 		} else {
-		s.Logger.Info("Telemetry shutdown successfully")
+			s.Logger.Info("Telemetry shutdown successfully")
 		}
 	}
 

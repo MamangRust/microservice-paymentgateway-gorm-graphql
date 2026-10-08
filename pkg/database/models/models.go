@@ -79,21 +79,21 @@ func (MerchantDocument) TableName() string { return "merchant_documents" }
 // ---------------------------------------------------------------------------
 
 type Card struct {
-	CardID              int32      `gorm:"column:card_id;primaryKey" json:"card_id"`
-	UserID              int32      `gorm:"column:user_id" json:"user_id"`
-	CardNumber          string     `gorm:"column:card_number" json:"card_number"`
-	CardType            string     `gorm:"column:card_type" json:"card_type"`
-	ExpireDate          time.Time  `gorm:"column:expire_date" json:"expire_date"`
-	Cvv                 string     `gorm:"column:cvv" json:"-"`
-	CardProvider        string     `gorm:"column:card_provider" json:"card_provider"`
-	Email               string     `gorm:"-" json:"email,omitempty"`
-	Status              string     `gorm:"column:status" json:"status"`
-	CreditLimit         int32      `gorm:"column:credit_limit" json:"credit_limit"`
-	OutstandingBalance  int64      `gorm:"column:outstanding_balance" json:"outstanding_balance"`
-	RewardPoints        int32      `gorm:"column:reward_points" json:"reward_points"`
-	CreatedAt           *time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt           *time.Time `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt           *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
+	CardID             int32      `gorm:"column:card_id;primaryKey" json:"card_id"`
+	UserID             int32      `gorm:"column:user_id" json:"user_id"`
+	CardNumber         string     `gorm:"column:card_number" json:"card_number"`
+	CardType           string     `gorm:"column:card_type" json:"card_type"`
+	ExpireDate         time.Time  `gorm:"column:expire_date" json:"expire_date"`
+	Cvv                string     `gorm:"column:cvv" json:"-"`
+	CardProvider       string     `gorm:"column:card_provider" json:"card_provider"`
+	Email              string     `gorm:"-" json:"email,omitempty"`
+	Status             string     `gorm:"column:status" json:"status"`
+	CreditLimit        int32      `gorm:"column:credit_limit" json:"credit_limit"`
+	OutstandingBalance int64      `gorm:"column:outstanding_balance" json:"outstanding_balance"`
+	RewardPoints       int32      `gorm:"column:reward_points" json:"reward_points"`
+	CreatedAt          *time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt          *time.Time `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt          *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
 }
 
 func (Card) TableName() string { return "cards" }
@@ -116,15 +116,15 @@ type CardAuthTransaction struct {
 func (CardAuthTransaction) TableName() string { return "card_auth_transactions" }
 
 type CardPayment struct {
-	PaymentID       int32      `gorm:"column:payment_id;primaryKey" json:"payment_id"`
-	PaymentUuid     string     `gorm:"column:payment_uuid" json:"payment_uuid"`
-	CardNumber      string     `gorm:"column:card_number" json:"card_number"`
-	BillingID       *int32     `gorm:"column:billing_id" json:"billing_id"`
-	Amount          int64      `gorm:"column:amount" json:"amount"`
-	PaymentChannel  string     `gorm:"column:payment_channel" json:"payment_channel"`
-	ReferenceID     *string    `gorm:"column:reference_id" json:"reference_id"`
-	CreatedAt       *time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt       *time.Time `gorm:"column:updated_at" json:"updated_at"`
+	PaymentID      int32      `gorm:"column:payment_id;primaryKey" json:"payment_id"`
+	PaymentUuid    string     `gorm:"column:payment_uuid" json:"payment_uuid"`
+	CardNumber     string     `gorm:"column:card_number" json:"card_number"`
+	BillingID      *int32     `gorm:"column:billing_id" json:"billing_id"`
+	Amount         int64      `gorm:"column:amount" json:"amount"`
+	PaymentChannel string     `gorm:"column:payment_channel" json:"payment_channel"`
+	ReferenceID    *string    `gorm:"column:reference_id" json:"reference_id"`
+	CreatedAt      *time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt      *time.Time `gorm:"column:updated_at" json:"updated_at"`
 }
 
 func (CardPayment) TableName() string { return "card_payments" }
@@ -163,31 +163,38 @@ func (BillingCycle) TableName() string { return "billing_cycles" }
 // ---------------------------------------------------------------------------
 
 type Saldo struct {
-	SaldoID        int32       `gorm:"column:saldo_id;primaryKey" json:"saldo_id"`
-	CardNumber     string      `gorm:"column:card_number" json:"card_number"`
-	TotalBalance   int64       `gorm:"column:total_balance" json:"total_balance"`
-	WithdrawAmount *int64      `gorm:"column:withdraw_amount" json:"withdraw_amount"`
-	WithdrawTime   *time.Time  `gorm:"column:withdraw_time" json:"withdraw_time"`
-	CreatedAt      *time.Time  `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt      *time.Time  `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt      *time.Time  `gorm:"column:deleted_at" json:"deleted_at"`
+	SaldoID        int32      `gorm:"column:saldo_id;primaryKey" json:"saldo_id"`
+	CardNumber     string     `gorm:"column:card_number" json:"card_number"`
+	TotalBalance   int64      `gorm:"column:total_balance" json:"total_balance"`
+	WithdrawAmount *int64     `gorm:"column:withdraw_amount" json:"withdraw_amount"`
+	WithdrawTime   *time.Time `gorm:"column:withdraw_time" json:"withdraw_time"`
+	CreatedAt      *time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt      *time.Time `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt      *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
 }
 
 func (Saldo) TableName() string { return "saldos" }
 
+// SaldoMutationResult is the response type for debit/credit/adjustment results.
+type SaldoMutationResult struct {
+	SaldoID      int32
+	CardNumber   string
+	TotalBalance int64
+}
+
 type BalanceLedger struct {
-	EntryID      int64      `gorm:"column:entry_id;primaryKey" json:"entry_id"`
-	OperationID  string     `gorm:"column:operation_id" json:"operation_id"`
-	CardNumber   string     `gorm:"column:card_number" json:"card_number"`
-	Direction    string     `gorm:"column:direction" json:"direction"`
-	Amount       int64      `gorm:"column:amount" json:"amount"`
-	Delta        int64      `gorm:"column:delta" json:"delta"`
-	BalanceBefore int64     `gorm:"column:balance_before" json:"balance_before"`
-	BalanceAfter  int64     `gorm:"column:balance_after" json:"balance_after"`
-	SourceType   string     `gorm:"column:source_type" json:"source_type"`
-	SourceID     *string    `gorm:"column:source_id" json:"source_id"`
-	Note         *string    `gorm:"column:note" json:"note"`
-	CreatedAt    *time.Time `gorm:"column:created_at" json:"created_at"`
+	EntryID       int64      `gorm:"column:entry_id;primaryKey" json:"entry_id"`
+	OperationID   string     `gorm:"column:operation_id" json:"operation_id"`
+	CardNumber    string     `gorm:"column:card_number" json:"card_number"`
+	Direction     string     `gorm:"column:direction" json:"direction"`
+	Amount        int64      `gorm:"column:amount" json:"amount"`
+	Delta         int64      `gorm:"column:delta" json:"delta"`
+	BalanceBefore int64      `gorm:"column:balance_before" json:"balance_before"`
+	BalanceAfter  int64      `gorm:"column:balance_after" json:"balance_after"`
+	SourceType    string     `gorm:"column:source_type" json:"source_type"`
+	SourceID      *string    `gorm:"column:source_id" json:"source_id"`
+	Note          *string    `gorm:"column:note" json:"note"`
+	CreatedAt     *time.Time `gorm:"column:created_at" json:"created_at"`
 }
 
 func (BalanceLedger) TableName() string { return "balance_ledger" }
@@ -236,18 +243,18 @@ type Transaction struct {
 func (Transaction) TableName() string { return "transactions" }
 
 type Topup struct {
-	TopupID     int32      `gorm:"column:topup_id;primaryKey" json:"topup_id"`
-	TopupNo     string     `gorm:"column:topup_no;type:uuid" json:"topup_no"`
-	CardNumber  string     `gorm:"column:card_number" json:"card_number"`
-	TopupAmount int64      `gorm:"column:topup_amount" json:"topup_amount"`
-	TopupMethod string     `gorm:"column:topup_method" json:"topup_method"`
-	TopupTime   time.Time  `gorm:"column:topup_time" json:"topup_time"`
-	Status      string     `gorm:"column:status" json:"status"`
-	CreatedAt   *time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt   *time.Time `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt   *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
-	OperationID string     `gorm:"column:operation_id;type:uuid" json:"operation_id"`
-	FailureReason *string  `gorm:"column:failure_reason" json:"failure_reason"`
+	TopupID       int32      `gorm:"column:topup_id;primaryKey" json:"topup_id"`
+	TopupNo       string     `gorm:"column:topup_no;type:uuid" json:"topup_no"`
+	CardNumber    string     `gorm:"column:card_number" json:"card_number"`
+	TopupAmount   int64      `gorm:"column:topup_amount" json:"topup_amount"`
+	TopupMethod   string     `gorm:"column:topup_method" json:"topup_method"`
+	TopupTime     time.Time  `gorm:"column:topup_time" json:"topup_time"`
+	Status        string     `gorm:"column:status" json:"status"`
+	CreatedAt     *time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt     *time.Time `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt     *time.Time `gorm:"column:deleted_at" json:"deleted_at"`
+	OperationID   string     `gorm:"column:operation_id;type:uuid" json:"operation_id"`
+	FailureReason *string    `gorm:"column:failure_reason" json:"failure_reason"`
 }
 
 func (Topup) TableName() string { return "topups" }
@@ -309,31 +316,3 @@ type ResetToken struct {
 }
 
 func (ResetToken) TableName() string { return "reset_tokens" }
-
-// ---------------------------------------------------------------------------
-// Infrastructure
-// ---------------------------------------------------------------------------
-
-type OutboxEvent struct {
-	ID            int64      `gorm:"column:id;primaryKey" json:"id"`
-	AggregateType string     `gorm:"column:aggregate_type" json:"aggregate_type"`
-	AggregateID   string     `gorm:"column:aggregate_id" json:"aggregate_id"`
-	EventType     string     `gorm:"column:event_type" json:"event_type"`
-	Payload       []byte     `gorm:"column:payload" json:"payload"`
-	Published     bool       `gorm:"column:published" json:"published"`
-	CreatedAt     *time.Time `gorm:"column:created_at" json:"created_at"`
-}
-
-func (OutboxEvent) TableName() string { return "outbox_events" }
-
-type IdempotencyRecord struct {
-	ID          int64      `gorm:"column:id;primaryKey" json:"id"`
-	Key         string     `gorm:"column:key" json:"key"`
-	RequestHash string     `gorm:"column:request_hash" json:"request_hash"`
-	Response    []byte     `gorm:"column:response" json:"response"`
-	StatusCode  int        `gorm:"column:status_code" json:"status_code"`
-	CreatedAt   *time.Time `gorm:"column:created_at" json:"created_at"`
-	ExpiresAt   *time.Time `gorm:"column:expires_at" json:"expires_at"`
-}
-
-func (IdempotencyRecord) TableName() string { return "idempotency_records" }

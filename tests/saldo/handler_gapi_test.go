@@ -8,7 +8,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	pb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo"
-	statspb "github.com/MamangRust/microservice-payment-gateway-grpc/pb/saldo/stats"
+	pbStats "github.com/MamangRust/microservice-payment-gateway-grpc/pb/stats/saldo"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/pkg/logger"
 	card_repo "github.com/MamangRust/microservice-payment-gateway-grpc/service/card/repository"
 	"github.com/MamangRust/microservice-payment-gateway-grpc/service/saldo/handler"
@@ -40,7 +40,7 @@ type SaldoHandlerGapiTestSuite struct {
 	grpcServer    *grpc.Server
 	commandClient pb.SaldoCommandServiceClient
 	queryClient   pb.SaldoQueryServiceClient
-	statsClient   statspb.SaldoStatsBalanceServiceClient
+	statsClient   pbStats.SaldoStatsBalanceServiceClient
 	conn          *grpc.ClientConn
 	cardNumber    string
 	userID        int
@@ -70,9 +70,9 @@ func (s *SaldoHandlerGapiTestSuite) SetupSuite() {
 			card_number String, total_balance Int64, created_at DateTime DEFAULT now()
 		) ENGINE = MergeTree() ORDER BY (card_number, created_at)`)
 
-	userRepos := user_repo.NewRepositories(gormDB)
+	userRepos := user_repo.NewRepositories(&user_repo.Deps{Db: gormDB, RoleQueryClient: s.ts.RoleQueryClient, UserRoleClient: s.ts.UserRoleClient})
 	cardRepos := card_repo.NewRepositories(gormDB, nil)
-	saldoRepos := saldo_repo.NewRepositories(gormDB, nil)
+	saldoRepos := saldo_repo.NewRepositories(gormDB, nil, nil)
 
 	logger.ResetInstance()
 	lp := sdklog.NewLoggerProvider()
@@ -84,7 +84,7 @@ func (s *SaldoHandlerGapiTestSuite) SetupSuite() {
 		Repositories: saldoRepos, CardAdapter: s.ts.CardAdapter, Logger: log, Cache: cacheStore,
 	})
 
-	user, err := userRepos.UserCommand().CreateUser(context.Background(), &requests.CreateUserRequest{
+	user, err := userRepos.UserCommand.CreateUser(context.Background(), &requests.CreateUserRequest{
 		FirstName: "Saldo", LastName: "Gapi", Email: "saldo.gapi@test.com", Password: "password123",
 	})
 	s.Require().NoError(err)
@@ -102,7 +102,7 @@ func (s *SaldoHandlerGapiTestSuite) SetupSuite() {
 	server := grpc.NewServer()
 	pb.RegisterSaldoCommandServiceServer(server, saldoHandler)
 	pb.RegisterSaldoQueryServiceServer(server, saldoHandler)
-	statspb.RegisterSaldoStatsBalanceServiceServer(server, saldoStatsHandler)
+	pbStats.RegisterSaldoStatsBalanceServiceServer(server, saldoStatsHandler)
 	s.grpcServer = server
 
 	lis, err := net.Listen("tcp", ":0")
@@ -114,14 +114,20 @@ func (s *SaldoHandlerGapiTestSuite) SetupSuite() {
 	s.conn = conn
 	s.commandClient = pb.NewSaldoCommandServiceClient(conn)
 	s.queryClient = pb.NewSaldoQueryServiceClient(conn)
-	s.statsClient = statspb.NewSaldoStatsBalanceServiceClient(conn)
+	s.statsClient = pbStats.NewSaldoStatsBalanceServiceClient(conn)
 }
 
 func (s *SaldoHandlerGapiTestSuite) TearDownSuite() {
-	if s.conn != nil { s.conn.Close() }
-	if s.grpcServer != nil { s.grpcServer.Stop() }
+	if s.conn != nil {
+		s.conn.Close()
+	}
+	if s.grpcServer != nil {
+		s.grpcServer.Stop()
+	}
 	s.redisClient.Close()
-	if s.chConn != nil { s.chConn.Close() }
+	if s.chConn != nil {
+		s.chConn.Close()
+	}
 	s.ts.Teardown()
 }
 
@@ -147,6 +153,8 @@ func (s *SaldoHandlerGapiTestSuite) Test10_BulkOperations() {
 }
 
 func TestSaldoHandlerGapiSuite(t *testing.T) {
-	if testing.Short() { t.Skip("skipping integration test") }
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 	suite.Run(t, new(SaldoHandlerGapiTestSuite))
 }
